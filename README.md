@@ -9,9 +9,9 @@ if err != nil {
     // handle error
 }
 
-fmt.Println(email.Subject()) // not a method, parsed from header on demand
-fmt.Println(email.Cc()) // not a method, parsed from header on demand
-fmt.Println(email.HTMLBody) // this is not a method
+fmt.Println(email.Subject()) // parsed from header on demand
+fmt.Println(email.Cc()) // parsed from header on demand
+fmt.Println(email.HTMLBody) // this is not a method, parsed beforehand
 ```
 
 ## This library is WIP.
