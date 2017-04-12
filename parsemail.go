@@ -1,17 +1,17 @@
 package parsemail
 
 import (
-	"net/mail"
-	"io"
-	"strings"
-	"mime/multipart"
-	"mime"
-	"fmt"
-	"errors"
-	"io/ioutil"
-	"time"
-	"encoding/base64"
 	"bytes"
+	"encoding/base64"
+	"errors"
+	"fmt"
+	"io"
+	"io/ioutil"
+	"mime"
+	"mime/multipart"
+	"net/mail"
+	"strings"
+	"time"
 )
 
 const content_type_multipart_mixed = "multipart/mixed"
@@ -21,7 +21,7 @@ const content_type_text_html = "text/html"
 const content_type_text_plain = "text/plain"
 
 func Parse(r io.Reader) (email Email, err error) {
-	msg, err := mail.ReadMessage(r);
+	msg, err := mail.ReadMessage(r)
 	if err != nil {
 		return
 	}
@@ -182,7 +182,7 @@ func parseMessageId(s string) string {
 }
 
 func parseMessageIdList(s string) (result []string) {
-	for _, p := range(strings.Split(s, " ")) {
+	for _, p := range strings.Split(s, " ") {
 		if strings.Trim(p, " \n") != "" {
 			result = append(result, parseMessageId(p))
 		}
@@ -299,7 +299,7 @@ func decodeMimeSentence(s string) (string, error) {
 	return strings.Join(result, ""), nil
 }
 
-func decodeHeaderMime(header mail.Header) (mail.Header, error)  {
+func decodeHeaderMime(header mail.Header) (mail.Header, error) {
 	parsedHeader := map[string][]string{}
 
 	for headerName, headerData := range header {
@@ -340,7 +340,7 @@ func isEmbeddedFile(part *multipart.Part) bool {
 }
 
 func decodeEmbeddedFile(part *multipart.Part) (ef EmbeddedFile, err error) {
-	cid, err := decodeMimeSentence(part.Header.Get("Content-Id"));
+	cid, err := decodeMimeSentence(part.Header.Get("Content-Id"))
 	if err != nil {
 		return
 	}
@@ -362,7 +362,7 @@ func isAttachment(part *multipart.Part) bool {
 }
 
 func decodeAttachment(part *multipart.Part) (at Attachment, err error) {
-	filename, err := decodeMimeSentence(part.FileName());
+	filename, err := decodeMimeSentence(part.FileName())
 	if err != nil {
 		return
 	}
@@ -380,15 +380,15 @@ func decodeAttachment(part *multipart.Part) (at Attachment, err error) {
 }
 
 type Attachment struct {
-	Filename string
+	Filename    string
 	ContentType string
-	Data io.Reader
+	Data        io.Reader
 }
 
 type EmbeddedFile struct {
-	CID string
+	CID         string
 	ContentType string
-	Data io.Reader
+	Data        io.Reader
 }
 
 type MessageID string
@@ -396,24 +396,24 @@ type MessageID string
 type Email struct {
 	Header mail.Header
 
-	Subject string
-	Sender *mail.Address
-	From []*mail.Address
-	ReplyTo []*mail.Address
-	To []*mail.Address
-	Cc []*mail.Address
-	Bcc []*mail.Address
-	Date time.Time
-	MessageID string
-	InReplyTo []string
+	Subject    string
+	Sender     *mail.Address
+	From       []*mail.Address
+	ReplyTo    []*mail.Address
+	To         []*mail.Address
+	Cc         []*mail.Address
+	Bcc        []*mail.Address
+	Date       time.Time
+	MessageID  string
+	InReplyTo  []string
 	References []string
 
-	ResentFrom []*mail.Address
-	ResentSender *mail.Address
-	ResentTo []*mail.Address
-	ResentDate time.Time
-	ResentCc []*mail.Address
-	ResentBcc []*mail.Address
+	ResentFrom      []*mail.Address
+	ResentSender    *mail.Address
+	ResentTo        []*mail.Address
+	ResentDate      time.Time
+	ResentCc        []*mail.Address
+	ResentBcc       []*mail.Address
 	ResentMessageID string
 
 	Received string
@@ -421,6 +421,6 @@ type Email struct {
 	HTMLBody string
 	TextBody string
 
-	Attachments []Attachment
+	Attachments   []Attachment
 	EmbeddedFiles []EmbeddedFile
 }

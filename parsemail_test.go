@@ -1,56 +1,56 @@
 package parsemail_test
 
 import (
-	"testing"
-	"github.com/DusanKasan/parsemail"
-	"strings"
-	"time"
-	"net/mail"
 	"encoding/base64"
+	"github.com/DusanKasan/parsemail"
 	"io/ioutil"
+	"net/mail"
+	"strings"
+	"testing"
+	"time"
 )
 
 func TestParseEmail(t *testing.T) {
-	var testData = map[int]struct{
+	var testData = map[int]struct {
 		mailData string
 
-		subject string
-		date time.Time
-		from []mail.Address
-		sender mail.Address
-		to []mail.Address
-		replyTo []mail.Address
-		cc []mail.Address
-		bcc []mail.Address
-		messageID string
-		resentDate time.Time
-		resentFrom []mail.Address
-		resentSender mail.Address
-		resentTo []mail.Address
-		resentReplyTo []mail.Address
-		resentCc []mail.Address
-		resentBcc []mail.Address
+		subject         string
+		date            time.Time
+		from            []mail.Address
+		sender          mail.Address
+		to              []mail.Address
+		replyTo         []mail.Address
+		cc              []mail.Address
+		bcc             []mail.Address
+		messageID       string
+		resentDate      time.Time
+		resentFrom      []mail.Address
+		resentSender    mail.Address
+		resentTo        []mail.Address
+		resentReplyTo   []mail.Address
+		resentCc        []mail.Address
+		resentBcc       []mail.Address
 		resentMessageID string
-		inReplyTo []string
-		references []string
-		htmlBody string
-		textBody string
-		attachments []attachmentData
-		embeddedFiles []embeddedFileData
-		headerCheck func (mail.Header, *testing.T)
+		inReplyTo       []string
+		references      []string
+		htmlBody        string
+		textBody        string
+		attachments     []attachmentData
+		embeddedFiles   []embeddedFileData
+		headerCheck     func(mail.Header, *testing.T)
 	}{
 		1: {
 			mailData: RFC5322_Example_A11,
-			subject: "Saying Hello",
+			subject:  "Saying Hello",
 			from: []mail.Address{
 				{"John Doe", "jdoe@machine.example"},
 			},
 			to: []mail.Address{
 				{"Mary Smith", "mary@example.net"},
 			},
-			sender: mail.Address{"Michael Jones", "mjones@machine.example"},
+			sender:    mail.Address{"Michael Jones", "mjones@machine.example"},
 			messageID: "1234@local.machine.example",
-			date: parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
+			date:      parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
 			textBody: `This is a message just to say hello.
 So, "Hello".`,
 		},
@@ -69,12 +69,12 @@ So, "Hello".`,
 				{"Giant; \"Big\" Box", "sysservices@example.net"},
 			},
 			messageID: "5678.21-Nov-1997@example.com",
-			date: parseDate("Tue, 01 Jul 2003 10:52:37 +0200"),
-			textBody: `Hi everyone.`,
+			date:      parseDate("Tue, 01 Jul 2003 10:52:37 +0200"),
+			textBody:  `Hi everyone.`,
 		},
 		3: {
 			mailData: RFC5322_Example_A2a,
-			subject: "Re: Saying Hello",
+			subject:  "Re: Saying Hello",
 			from: []mail.Address{
 				{"Mary Smith", "mary@example.net"},
 			},
@@ -84,30 +84,30 @@ So, "Hello".`,
 			to: []mail.Address{
 				{"John Doe", "jdoe@machine.example"},
 			},
-			messageID: "3456@example.net",
-			inReplyTo: []string{"1234@local.machine.example"},
+			messageID:  "3456@example.net",
+			inReplyTo:  []string{"1234@local.machine.example"},
 			references: []string{"1234@local.machine.example"},
-			date: parseDate("Fri, 21 Nov 1997 10:01:10 -0600"),
-			textBody: `This is a reply to your hello.`,
+			date:       parseDate("Fri, 21 Nov 1997 10:01:10 -0600"),
+			textBody:   `This is a reply to your hello.`,
 		},
 		4: {
 			mailData: RFC5322_Example_A2b,
-			subject: "Re: Saying Hello",
+			subject:  "Re: Saying Hello",
 			from: []mail.Address{
 				{"John Doe", "jdoe@machine.example"},
 			},
 			to: []mail.Address{
 				{"Mary Smith: Personal Account", "smith@home.example"},
 			},
-			messageID: "abcd.1234@local.machine.test",
-			inReplyTo: []string{"3456@example.net"},
+			messageID:  "abcd.1234@local.machine.test",
+			inReplyTo:  []string{"3456@example.net"},
 			references: []string{"1234@local.machine.example", "3456@example.net"},
-			date: parseDate("Fri, 21 Nov 1997 11:00:00 -0600"),
-			textBody: `This is a reply to your reply.`,
+			date:       parseDate("Fri, 21 Nov 1997 11:00:00 -0600"),
+			textBody:   `This is a reply to your reply.`,
 		},
 		5: {
 			mailData: RFC5322_Example_A3,
-			subject: "Saying Hello",
+			subject:  "Saying Hello",
 			from: []mail.Address{
 				{"John Doe", "jdoe@machine.example"},
 			},
@@ -115,7 +115,7 @@ So, "Hello".`,
 				{"Mary Smith", "mary@example.net"},
 			},
 			messageID: "1234@local.machine.example",
-			date: parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
+			date:      parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
 			resentFrom: []mail.Address{
 				{"Mary Smith", "mary@example.net"},
 			},
@@ -123,13 +123,13 @@ So, "Hello".`,
 				{"Jane Brown", "j-brown@other.example"},
 			},
 			resentMessageID: "78910@example.net",
-			resentDate: parseDate("Mon, 24 Nov 1997 14:22:01 -0800"),
+			resentDate:      parseDate("Mon, 24 Nov 1997 14:22:01 -0800"),
 			textBody: `This is a message just to say hello.
 So, "Hello".`,
 		},
 		6: {
 			mailData: Data1,
-			subject: "Test Subject 1",
+			subject:  "Test Subject 1",
 			from: []mail.Address{
 				{"Peter Paholík", "peter.paholik@gmail.com"},
 			},
@@ -137,19 +137,19 @@ So, "Hello".`,
 				{"", "dusan@kasan.sk"},
 			},
 			messageID: "CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com",
-			date: parseDate("Fri, 07 Apr 2017 09:17:26 +0200"),
-			htmlBody: "<div dir=\"ltr\"><br></div>",
+			date:      parseDate("Fri, 07 Apr 2017 09:17:26 +0200"),
+			htmlBody:  "<div dir=\"ltr\"><br></div>",
 			attachments: []attachmentData{
 				{
-					filename: "Peter Paholík 1 4 2017 2017-04-07.pdf",
+					filename:    "Peter Paholík 1 4 2017 2017-04-07.pdf",
 					contentType: "application/pdf",
-					base64data: "JVBERi0xLjQNCiW1tbW1DQoxIDAgb2JqDQo8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFIvTGFuZyhlbi1VUykgL1N0cnVjdFRyZWVSb290IDY3IDAgUi9NYXJrSW5mbzw8L01hcmtlZCB0cnVlPj4vT3V0cHV0SW50ZW50c1s8PC9UeXBlL091dHB1dEludGVudC9TL0dUU19QREZBMS9PdXRwdXRDb25kZXYgMzk1MzYyDQo+Pg0Kc3RhcnR4cmVmDQo0MTk4ODUNCiUlRU9GDQo=",
+					base64data:  "JVBERi0xLjQNCiW1tbW1DQoxIDAgb2JqDQo8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFIvTGFuZyhlbi1VUykgL1N0cnVjdFRyZWVSb290IDY3IDAgUi9NYXJrSW5mbzw8L01hcmtlZCB0cnVlPj4vT3V0cHV0SW50ZW50c1s8PC9UeXBlL091dHB1dEludGVudC9TL0dUU19QREZBMS9PdXRwdXRDb25kZXYgMzk1MzYyDQo+Pg0Kc3RhcnR4cmVmDQo0MTk4ODUNCiUlRU9GDQo=",
 				},
 			},
 		},
 		7: {
 			mailData: Data2,
-			subject: "Re: Test Subject 2",
+			subject:  "Re: Test Subject 2",
 			from: []mail.Address{
 				{"Sender Man", "sender@domain.com"},
 			},
@@ -159,11 +159,11 @@ So, "Hello".`,
 			cc: []mail.Address{
 				{"Cc Man", "ccman@gmail.com"},
 			},
-			messageID: "0e9a21b4-01dc-e5c1-dcd6-58ce5aa61f4f@receiver.com",
-			inReplyTo: []string{"9ff38d03-c4ab-89b7-9328-e99d5e24e3ba@receiver.eu"},
+			messageID:  "0e9a21b4-01dc-e5c1-dcd6-58ce5aa61f4f@receiver.com",
+			inReplyTo:  []string{"9ff38d03-c4ab-89b7-9328-e99d5e24e3ba@receiver.eu"},
 			references: []string{"2f6b7595-c01e-46e5-42bc-f263e1c4282d@receiver.com", "9ff38d03-c4ab-89b7-9328-e99d5e24e3ba@domain.com"},
-			date: parseDate("Fri, 07 Apr 2017 12:59:55 +0200"),
-			htmlBody: `<html>data<img src="part2.9599C449.04E5EC81@develhell.com"/></html>`,
+			date:       parseDate("Fri, 07 Apr 2017 12:59:55 +0200"),
+			htmlBody:   `<html>data<img src="part2.9599C449.04E5EC81@develhell.com"/></html>`,
 			textBody: `First level
 > Second level
 >> Third level
@@ -171,9 +171,9 @@ So, "Hello".`,
 `,
 			embeddedFiles: []embeddedFileData{
 				{
-					cid: "part2.9599C449.04E5EC81@develhell.com",
+					cid:         "part2.9599C449.04E5EC81@develhell.com",
 					contentType: "image/png",
-					base64data: "iVBORw0KGgoAAAANSUhEUgAAAQEAAAAYCAIAAAB1IN9NAAAACXBIWXMAAAsTAAALEwEAmpwYYKUKF+Os3baUndC0pDnwNAmLy1SUr2Gw0luxQuV/AwC6cEhVV5VRrwAAAABJRU5ErkJggg==",
+					base64data:  "iVBORw0KGgoAAAANSUhEUgAAAQEAAAAYCAIAAAB1IN9NAAAACXBIWXMAAAsTAAALEwEAmpwYYKUKF+Os3baUndC0pDnwNAmLy1SUr2Gw0luxQuV/AwC6cEhVV5VRrwAAAABJRU5ErkJggg==",
 				},
 			},
 		},
@@ -282,16 +282,15 @@ So, "Hello".`,
 			t.Errorf("[Test Case %v] Wrong text body. Expected: '%s', Got: '%s'", index, td.textBody, e.TextBody)
 		}
 
-
 		if len(td.attachments) != len(e.Attachments) {
 			t.Errorf("[Test Case %v] Incorrect number of attachments! Expected: %v, Got: %v.", index, len(td.attachments), len(e.Attachments))
 		} else {
 			attachs := e.Attachments[:]
 
-			for _, ad := range(td.attachments) {
+			for _, ad := range td.attachments {
 				found := false
 
-				for i, ra := range(attachs) {
+				for i, ra := range attachs {
 					b, err := ioutil.ReadAll(ra.Data)
 					if err != nil {
 						t.Error(err)
@@ -319,10 +318,10 @@ So, "Hello".`,
 		} else {
 			embeds := e.EmbeddedFiles[:]
 
-			for _, ad := range(td.embeddedFiles) {
+			for _, ad := range td.embeddedFiles {
 				found := false
 
-				for i, ra := range(embeds) {
+				for i, ra := range embeds {
 					b, err := ioutil.ReadAll(ra.Data)
 					if err != nil {
 						t.Error(err)
@@ -357,16 +356,16 @@ func parseDate(in string) time.Time {
 	return out
 }
 
-type attachmentData struct{
-	filename string
+type attachmentData struct {
+	filename    string
 	contentType string
-	base64data string
+	base64data  string
 }
 
-type embeddedFileData struct{
-	cid string
+type embeddedFileData struct {
+	cid         string
 	contentType string
-	base64data string
+	base64data  string
 }
 
 func assertSliceEq(a, b []string) bool {
@@ -375,11 +374,11 @@ func assertSliceEq(a, b []string) bool {
 	}
 
 	if a == nil && b == nil {
-		return true;
+		return true
 	}
 
 	if a == nil || b == nil {
-		return false;
+		return false
 	}
 
 	if len(a) != len(b) {
@@ -401,11 +400,11 @@ func assertAddressListEq(a, b []mail.Address) bool {
 	}
 
 	if a == nil && b == nil {
-		return true;
+		return true
 	}
 
 	if a == nil || b == nil {
-		return false;
+		return false
 	}
 
 	if len(a) != len(b) {
@@ -422,7 +421,7 @@ func assertAddressListEq(a, b []mail.Address) bool {
 }
 
 func dereferenceAddressList(al []*mail.Address) (result []mail.Address) {
-	for _, a := range(al) {
+	for _, a := range al {
 		result = append(result, *a)
 	}
 
