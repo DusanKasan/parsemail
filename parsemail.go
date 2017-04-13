@@ -47,8 +47,6 @@ func Parse(r io.Reader) (email Email, err error) {
 	case content_type_text_html:
 		message, _ := ioutil.ReadAll(msg.Body)
 		email.HTMLBody = strings.TrimSuffix(string(message[:]), "\n")
-	case "":
-		err = errors.New("No top level mime type specified")
 	default:
 		err = errors.New(fmt.Sprintf("Unknown top level mime type: %s", contentType))
 	}
@@ -391,8 +389,6 @@ type EmbeddedFile struct {
 	Data        io.Reader
 }
 
-type MessageID string
-
 type Email struct {
 	Header mail.Header
 
@@ -415,8 +411,6 @@ type Email struct {
 	ResentCc        []*mail.Address
 	ResentBcc       []*mail.Address
 	ResentMessageID string
-
-	Received string
 
 	HTMLBody string
 	TextBody string

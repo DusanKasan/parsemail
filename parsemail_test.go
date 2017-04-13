@@ -1,8 +1,7 @@
-package parsemail_test
+package parsemail
 
 import (
 	"encoding/base64"
-	"github.com/DusanKasan/parsemail"
 	"io/ioutil"
 	"net/mail"
 	"strings"
@@ -180,7 +179,7 @@ So, "Hello".`,
 	}
 
 	for index, td := range testData {
-		e, err := parsemail.Parse(strings.NewReader(td.mailData))
+		e, err := Parse(strings.NewReader(td.mailData))
 		if err != nil {
 			t.Error(err)
 		}
