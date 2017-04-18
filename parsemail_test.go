@@ -39,49 +39,85 @@ func TestParseEmail(t *testing.T) {
 		headerCheck     func(mail.Header, *testing.T)
 	}{
 		1: {
-			mailData: RFC5322_Example_A11,
+			mailData: rfc5322exampleA11,
 			subject:  "Saying Hello",
 			from: []mail.Address{
-				{"John Doe", "jdoe@machine.example"},
+				{
+					Name:    "John Doe",
+					Address: "jdoe@machine.example",
+				},
 			},
 			to: []mail.Address{
-				{"Mary Smith", "mary@example.net"},
+				{
+					Name:    "Mary Smith",
+					Address: "mary@example.net",
+				},
 			},
-			sender:    mail.Address{"Michael Jones", "mjones@machine.example"},
+			sender: mail.Address{
+				Name:    "Michael Jones",
+				Address: "mjones@machine.example",
+			},
 			messageID: "1234@local.machine.example",
 			date:      parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
 			textBody: `This is a message just to say hello.
 So, "Hello".`,
 		},
 		2: {
-			mailData: RFC5322_Example_A12,
+			mailData: rfc5322exampleA12,
 			from: []mail.Address{
-				{"Joe Q. Public", "john.q.public@example.com"},
+				{
+					Name:    "Joe Q. Public",
+					Address: "john.q.public@example.com",
+				},
 			},
 			to: []mail.Address{
-				{"Mary Smith", "mary@x.test"},
-				{"", "jdoe@example.org"},
-				{"Who?", "one@y.test"},
+				{
+					Name:    "Mary Smith",
+					Address: "mary@x.test",
+				},
+				{
+					Name:    "",
+					Address: "jdoe@example.org",
+				},
+				{
+					Name:    "Who?",
+					Address: "one@y.test",
+				},
 			},
 			cc: []mail.Address{
-				{"", "boss@nil.test"},
-				{"Giant; \"Big\" Box", "sysservices@example.net"},
+				{
+					Name:    "",
+					Address: "boss@nil.test",
+				},
+				{
+					Name:    "Giant; \"Big\" Box",
+					Address: "sysservices@example.net",
+				},
 			},
 			messageID: "5678.21-Nov-1997@example.com",
 			date:      parseDate("Tue, 01 Jul 2003 10:52:37 +0200"),
 			textBody:  `Hi everyone.`,
 		},
 		3: {
-			mailData: RFC5322_Example_A2a,
+			mailData: rfc5322exampleA2a,
 			subject:  "Re: Saying Hello",
 			from: []mail.Address{
-				{"Mary Smith", "mary@example.net"},
+				{
+					Name:    "Mary Smith",
+					Address: "mary@example.net",
+				},
 			},
 			replyTo: []mail.Address{
-				{"Mary Smith: Personal Account", "smith@home.example"},
+				{
+					Name:    "Mary Smith: Personal Account",
+					Address: "smith@home.example",
+				},
 			},
 			to: []mail.Address{
-				{"John Doe", "jdoe@machine.example"},
+				{
+					Name:    "John Doe",
+					Address: "jdoe@machine.example",
+				},
 			},
 			messageID:  "3456@example.net",
 			inReplyTo:  []string{"1234@local.machine.example"},
@@ -90,13 +126,19 @@ So, "Hello".`,
 			textBody:   `This is a reply to your hello.`,
 		},
 		4: {
-			mailData: RFC5322_Example_A2b,
+			mailData: rfc5322exampleA2b,
 			subject:  "Re: Saying Hello",
 			from: []mail.Address{
-				{"John Doe", "jdoe@machine.example"},
+				{
+					Name:    "John Doe",
+					Address: "jdoe@machine.example",
+				},
 			},
 			to: []mail.Address{
-				{"Mary Smith: Personal Account", "smith@home.example"},
+				{
+					Name:    "Mary Smith: Personal Account",
+					Address: "smith@home.example",
+				},
 			},
 			messageID:  "abcd.1234@local.machine.test",
 			inReplyTo:  []string{"3456@example.net"},
@@ -105,21 +147,33 @@ So, "Hello".`,
 			textBody:   `This is a reply to your reply.`,
 		},
 		5: {
-			mailData: RFC5322_Example_A3,
+			mailData: rfc5322exampleA3,
 			subject:  "Saying Hello",
 			from: []mail.Address{
-				{"John Doe", "jdoe@machine.example"},
+				{
+					Name:    "John Doe",
+					Address: "jdoe@machine.example",
+				},
 			},
 			to: []mail.Address{
-				{"Mary Smith", "mary@example.net"},
+				{
+					Name:    "Mary Smith",
+					Address: "mary@example.net",
+				},
 			},
 			messageID: "1234@local.machine.example",
 			date:      parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
 			resentFrom: []mail.Address{
-				{"Mary Smith", "mary@example.net"},
+				{
+					Name:    "Mary Smith",
+					Address: "mary@example.net",
+				},
 			},
 			resentTo: []mail.Address{
-				{"Jane Brown", "j-brown@other.example"},
+				{
+					Name:    "Jane Brown",
+					Address: "j-brown@other.example",
+				},
 			},
 			resentMessageID: "78910@example.net",
 			resentDate:      parseDate("Mon, 24 Nov 1997 14:22:01 -0800"),
@@ -127,13 +181,19 @@ So, "Hello".`,
 So, "Hello".`,
 		},
 		6: {
-			mailData: Data1,
+			mailData: data1,
 			subject:  "Test Subject 1",
 			from: []mail.Address{
-				{"Peter Paholík", "peter.paholik@gmail.com"},
+				{
+					Name:    "Peter Paholík",
+					Address: "peter.paholik@gmail.com",
+				},
 			},
 			to: []mail.Address{
-				{"", "dusan@kasan.sk"},
+				{
+					Name:    "",
+					Address: "dusan@kasan.sk",
+				},
 			},
 			messageID: "CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com",
 			date:      parseDate("Fri, 07 Apr 2017 09:17:26 +0200"),
@@ -147,16 +207,25 @@ So, "Hello".`,
 			},
 		},
 		7: {
-			mailData: Data2,
+			mailData: data2,
 			subject:  "Re: Test Subject 2",
 			from: []mail.Address{
-				{"Sender Man", "sender@domain.com"},
+				{
+					Name:    "Sender Man",
+					Address: "sender@domain.com",
+				},
 			},
 			to: []mail.Address{
-				{"", "info@receiver.com"},
+				{
+					Name:    "",
+					Address: "info@receiver.com",
+				},
 			},
 			cc: []mail.Address{
-				{"Cc Man", "ccman@gmail.com"},
+				{
+					Name:    "Cc Man",
+					Address: "ccman@gmail.com",
+				},
 			},
 			messageID:  "0e9a21b4-01dc-e5c1-dcd6-58ce5aa61f4f@receiver.com",
 			inReplyTo:  []string{"9ff38d03-c4ab-89b7-9328-e99d5e24e3ba@receiver.eu"},
@@ -313,7 +382,7 @@ So, "Hello".`,
 		}
 
 		if len(td.embeddedFiles) != len(e.EmbeddedFiles) {
-			t.Errorf("[Test Case %v] Incorrect number of embedded files! Expected: %s, Got: %s.", index, len(td.embeddedFiles), len(e.EmbeddedFiles))
+			t.Errorf("[Test Case %v] Incorrect number of embedded files! Expected: %s, Got: %v.", index, len(td.embeddedFiles), len(e.EmbeddedFiles))
 		} else {
 			embeds := e.EmbeddedFiles[:]
 
@@ -427,7 +496,7 @@ func dereferenceAddressList(al []*mail.Address) (result []mail.Address) {
 	return
 }
 
-var Data1 = `From: =?UTF-8?Q?Peter_Pahol=C3=ADk?= <peter.paholik@gmail.com>
+var data1 = `From: =?UTF-8?Q?Peter_Pahol=C3=ADk?= <peter.paholik@gmail.com>
 Date: Fri, 7 Apr 2017 09:17:26 +0200
 Message-ID: <CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com>
 Subject: Test Subject 1
@@ -465,7 +534,7 @@ ZXYgMzk1MzYyDQo+Pg0Kc3RhcnR4cmVmDQo0MTk4ODUNCiUlRU9GDQo=
 --f403045f1dcc043a44054c8e6bbf--
 `
 
-var Data2 = `Subject: Re: Test Subject 2
+var data2 = `Subject: Re: Test Subject 2
 To: info@receiver.com
 References: <2f6b7595-c01e-46e5-42bc-f263e1c4282d@receiver.com>
  <9ff38d03-c4ab-89b7-9328-e99d5e24e3ba@domain.com>
@@ -514,7 +583,7 @@ YKUKF+Os3baUndC0pDnwNAmLy1SUr2Gw0luxQuV/AwC6cEhVV5VRrwAAAABJRU5ErkJggg==
 --------------C70C0458A558E585ACB75FB4--
 `
 
-var RFC5322_Example_A11 = `From: John Doe <jdoe@machine.example>
+var rfc5322exampleA11 = `From: John Doe <jdoe@machine.example>
 Sender: Michael Jones <mjones@machine.example>
 To: Mary Smith <mary@example.net>
 Subject: Saying Hello
@@ -525,7 +594,7 @@ This is a message just to say hello.
 So, "Hello".
 `
 
-var RFC5322_Example_A12 = `From: "Joe Q. Public" <john.q.public@example.com>
+var rfc5322exampleA12 = `From: "Joe Q. Public" <john.q.public@example.com>
 To: Mary Smith <mary@x.test>, jdoe@example.org, Who? <one@y.test>
 Cc: <boss@nil.test>, "Giant; \"Big\" Box" <sysservices@example.net>
 Date: Tue, 1 Jul 2003 10:52:37 +0200
@@ -536,7 +605,7 @@ Hi everyone.
 
 //todo: not yet implemented in net/mail
 //once there is support for this, add it
-var RFC5322_Example_A13 = `From: Pete <pete@silly.example>
+var rfc5322exampleA13 = `From: Pete <pete@silly.example>
 To: A Group:Ed Jones <c@a.test>,joe@where.test,John <jdoe@one.test>;
 Cc: Undisclosed recipients:;
 Date: Thu, 13 Feb 1969 23:32:54 -0330
@@ -546,7 +615,7 @@ Testing.
 `
 
 //we skipped the first message bcause it's the same as A 1.1
-var RFC5322_Example_A2a = `From: Mary Smith <mary@example.net>
+var rfc5322exampleA2a = `From: Mary Smith <mary@example.net>
 To: John Doe <jdoe@machine.example>
 Reply-To: "Mary Smith: Personal Account" <smith@home.example>
 Subject: Re: Saying Hello
@@ -558,7 +627,7 @@ References: <1234@local.machine.example>
 This is a reply to your hello.
 `
 
-var RFC5322_Example_A2b = `To: "Mary Smith: Personal Account" <smith@home.example>
+var rfc5322exampleA2b = `To: "Mary Smith: Personal Account" <smith@home.example>
 From: John Doe <jdoe@machine.example>
 Subject: Re: Saying Hello
 Date: Fri, 21 Nov 1997 11:00:00 -0600
@@ -569,7 +638,7 @@ References: <1234@local.machine.example> <3456@example.net>
 This is a reply to your reply.
 `
 
-var RFC5322_Example_A3 = `Resent-From: Mary Smith <mary@example.net>
+var rfc5322exampleA3 = `Resent-From: Mary Smith <mary@example.net>
 Resent-To: Jane Brown <j-brown@other.example>
 Resent-Date: Mon, 24 Nov 1997 14:22:01 -0800
 Resent-Message-ID: <78910@example.net>
@@ -582,7 +651,7 @@ Message-ID: <1234@local.machine.example>
 This is a message just to say hello.
 So, "Hello".`
 
-var RFC5322_Example_A4 = `Received: from x.y.test
+var rfc5322exampleA4 = `Received: from x.y.test
   by example.net
   via TCP
   with ESMTP
