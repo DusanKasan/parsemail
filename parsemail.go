@@ -295,7 +295,7 @@ func decodeAttachment(part *multipart.Part) (at Attachment, err error) {
 
 type headerParser struct {
 	header *mail.Header
-	err error
+	err    error
 }
 
 func (hp headerParser) parseAddress(s string) (ma *mail.Address) {
@@ -326,7 +326,7 @@ func (hp headerParser) parseAddressList(s string) (ma []*mail.Address) {
 }
 
 func (hp headerParser) parseTime(s string) (t time.Time) {
-	if hp.err != nil || s == ""{
+	if hp.err != nil || s == "" {
 		return
 	}
 
