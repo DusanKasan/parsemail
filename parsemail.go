@@ -55,81 +55,31 @@ func Parse(r io.Reader) (email Email, err error) {
 }
 
 func createEmailFromHeader(header mail.Header) (email Email, err error) {
+	hp := headerParser{header: &header}
+
 	email.Subject = header.Get("Subject")
+	email.From = hp.parseAddressList(header.Get("From"))
+	email.Sender = hp.parseAddress(header.Get("Sender"))
+	email.ReplyTo = hp.parseAddressList(header.Get("Reply-To"))
+	email.To = hp.parseAddressList(header.Get("To"))
+	email.Cc = hp.parseAddressList(header.Get("Cc"))
+	email.Bcc = hp.parseAddressList(header.Get("Bcc"))
+	email.Date = hp.parseTime(header.Get("Date"))
+	email.ResentFrom = hp.parseAddressList(header.Get("Resent-From"))
+	email.ResentSender = hp.parseAddress(header.Get("Resent-Sender"))
+	email.ResentTo = hp.parseAddressList(header.Get("Resent-To"))
+	email.ResentCc = hp.parseAddressList(header.Get("Resent-Cc"))
+	email.ResentBcc = hp.parseAddressList(header.Get("Resent-Bcc"))
+	email.ResentMessageID = hp.parseMessageId(header.Get("Resent-Message-ID"))
+	email.MessageID = hp.parseMessageId(header.Get("Message-ID"))
+	email.InReplyTo = hp.parseMessageIdList(header.Get("In-Reply-To"))
+	email.References = hp.parseMessageIdList(header.Get("References"))
+	email.ResentDate = hp.parseTime(header.Get("Resent-Date"))
 
-	email.From, err = parseAddressList(header.Get("From"))
-	if err != nil {
+	if hp.err != nil {
+		err = hp.err
 		return
 	}
-
-	email.Sender, err = parseAddress(header.Get("Sender"))
-	if err != nil {
-		return
-	}
-
-	email.ReplyTo, err = parseAddressList(header.Get("Reply-To"))
-	if err != nil {
-		return
-	}
-
-	email.To, err = parseAddressList(header.Get("To"))
-	if err != nil {
-		return
-	}
-
-	email.Cc, err = parseAddressList(header.Get("Cc"))
-	if err != nil {
-		return
-	}
-
-	email.Bcc, err = parseAddressList(header.Get("Bcc"))
-	if err != nil {
-		return
-	}
-
-	email.Date, err = parseTime(header.Get("Date"))
-	if err != nil {
-		return
-	}
-
-	email.ResentFrom, err = parseAddressList(header.Get("Resent-From"))
-	if err != nil {
-		return
-	}
-
-	email.ResentSender, err = parseAddress(header.Get("Resent-Sender"))
-	if err != nil {
-		return
-	}
-
-	email.ResentTo, err = parseAddressList(header.Get("Resent-To"))
-	if err != nil {
-		return
-	}
-
-	email.ResentCc, err = parseAddressList(header.Get("Resent-Cc"))
-	if err != nil {
-		return
-	}
-
-	email.ResentBcc, err = parseAddressList(header.Get("Resent-Bcc"))
-	if err != nil {
-		return
-	}
-
-	if header.Get("Resent-Date") == "" {
-		email.ResentDate = time.Time{}
-	} else {
-		email.ResentDate, err = parseTime(header.Get("Resent-Date"))
-		if err != nil {
-			return
-		}
-	}
-
-	email.ResentMessageID = parseMessageId(header.Get("Resent-Message-ID"))
-	email.MessageID = parseMessageId(header.Get("Message-ID"))
-	email.InReplyTo = parseMessageIdList(header.Get("In-Reply-To"))
-	email.References = parseMessageIdList(header.Get("References"))
 
 	//decode whole header for easier access to extra fields
 	//todo: should we decode? aren't only standard fields mime encoded?
@@ -148,45 +98,6 @@ func parseContentType(contentTypeHeader string) (contentType string, params map[
 	}
 
 	return mime.ParseMediaType(contentTypeHeader)
-}
-
-func parseAddress(s string) (*mail.Address, error) {
-	if strings.Trim(s, " \n") != "" {
-		return mail.ParseAddress(s)
-	}
-
-	return nil, nil
-}
-
-func parseAddressList(s string) ([]*mail.Address, error) {
-	if strings.Trim(s, " \n") != "" {
-		return mail.ParseAddressList(s)
-	}
-
-	return []*mail.Address{}, nil
-}
-
-func parseTime(s string) (time.Time, error) {
-	t, err := time.Parse(time.RFC1123Z, s)
-	if err == nil {
-		return t, err
-	}
-
-	return time.Parse("Mon, 2 Jan 2006 15:04:05 -0700", s)
-}
-
-func parseMessageId(s string) string {
-	return strings.Trim(s, "<> ")
-}
-
-func parseMessageIdList(s string) (result []string) {
-	for _, p := range strings.Split(s, " ") {
-		if strings.Trim(p, " \n") != "" {
-			result = append(result, parseMessageId(p))
-		}
-	}
-
-	return
 }
 
 func parseMultipartAlternative(msg io.Reader, boundary string) (textBody, htmlBody string, embeddedFiles []EmbeddedFile, err error) {
@@ -378,6 +289,75 @@ func decodeAttachment(part *multipart.Part) (at Attachment, err error) {
 	at.Filename = filename
 	at.Data = decoded
 	at.ContentType = strings.Split(part.Header.Get("Content-Type"), ";")[0]
+
+	return
+}
+
+type headerParser struct {
+	header *mail.Header
+	err error
+}
+
+func (hp headerParser) parseAddress(s string) (ma *mail.Address) {
+	if hp.err != nil {
+		return nil
+	}
+
+	if strings.Trim(s, " \n") != "" {
+		ma, hp.err = mail.ParseAddress(s)
+
+		return ma
+	}
+
+	return nil
+}
+
+func (hp headerParser) parseAddressList(s string) (ma []*mail.Address) {
+	if hp.err != nil {
+		return
+	}
+
+	if strings.Trim(s, " \n") != "" {
+		ma, hp.err = mail.ParseAddressList(s)
+		return
+	}
+
+	return
+}
+
+func (hp headerParser) parseTime(s string) (t time.Time) {
+	if hp.err != nil || s == ""{
+		return
+	}
+
+	t, hp.err = time.Parse(time.RFC1123Z, s)
+	if hp.err == nil {
+		return t
+	}
+
+	t, hp.err = time.Parse("Mon, 2 Jan 2006 15:04:05 -0700", s)
+
+	return
+}
+
+func (hp headerParser) parseMessageId(s string) string {
+	if hp.err != nil {
+		return ""
+	}
+
+	return strings.Trim(s, "<> ")
+}
+
+func (hp headerParser) parseMessageIdList(s string) (result []string) {
+	if hp.err != nil {
+		return
+	}
+
+	for _, p := range strings.Split(s, " ") {
+		if strings.Trim(p, " \n") != "" {
+			result = append(result, hp.parseMessageId(p))
+		}
+	}
 
 	return
 }
