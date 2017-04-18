@@ -382,7 +382,7 @@ So, "Hello".`,
 		}
 
 		if len(td.embeddedFiles) != len(e.EmbeddedFiles) {
-			t.Errorf("[Test Case %v] Incorrect number of embedded files! Expected: %s, Got: %v.", index, len(td.embeddedFiles), len(e.EmbeddedFiles))
+			t.Errorf("[Test Case %v] Incorrect number of embedded files! Expected: %v, Got: %v.", index, len(td.embeddedFiles), len(e.EmbeddedFiles))
 		} else {
 			embeds := e.EmbeddedFiles[:]
 

@@ -218,8 +218,11 @@ func parseMultipartAlternative(msg io.Reader, boundary string) (textBody, htmlBo
 
 			htmlBody += strings.TrimSuffix(string(ppContent[:]), "\n")
 		case contentTypeMultipartRelated:
-			tb, hb, ef, er := parseMultipartAlternative(part, params["boundary"])
-			err = er
+			tb, hb, ef, err := parseMultipartAlternative(part, params["boundary"])
+			if err != nil {
+				return textBody, htmlBody, embeddedFiles, err
+			}
+
 			htmlBody += hb
 			textBody += tb
 			embeddedFiles = append(embeddedFiles, ef...)
@@ -376,21 +379,21 @@ func decodeAttachment(part *multipart.Part) (at Attachment, err error) {
 	return
 }
 
-// Represents email attachment with filename, content type and data (as a io.Reader)
+// Attachment with filename, content type and data (as a io.Reader)
 type Attachment struct {
 	Filename    string
 	ContentType string
 	Data        io.Reader
 }
 
-// Represents email embedded file with content id, content type and data (as a io.Reader)
+// EmbeddedFile with content id, content type and data (as a io.Reader)
 type EmbeddedFile struct {
 	CID         string
 	ContentType string
 	Data        io.Reader
 }
 
-// Represents email with fields for all the headers defined in RFC5322 with it's attachments and
+// Email with fields for all the headers defined in RFC5322 with it's attachments and
 type Email struct {
 	Header mail.Header
 
