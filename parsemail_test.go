@@ -182,7 +182,7 @@ So, "Hello".`,
 		},
 		6: {
 			mailData: data1,
-			subject:  "Test Subject 1",
+			subject:  "Peter Paholík",
 			from: []mail.Address{
 				{
 					Name:    "Peter Paholík",
@@ -499,7 +499,7 @@ func dereferenceAddressList(al []*mail.Address) (result []mail.Address) {
 var data1 = `From: =?UTF-8?Q?Peter_Pahol=C3=ADk?= <peter.paholik@gmail.com>
 Date: Fri, 7 Apr 2017 09:17:26 +0200
 Message-ID: <CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com>
-Subject: Test Subject 1
+Subject: =?UTF-8?Q?Peter_Pahol=C3=ADk?=
 To: dusan@kasan.sk
 Content-Type: multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf
 

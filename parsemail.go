@@ -57,7 +57,7 @@ func Parse(r io.Reader) (email Email, err error) {
 func createEmailFromHeader(header mail.Header) (email Email, err error) {
 	hp := headerParser{header: &header}
 
-	email.Subject = header.Get("Subject")
+	email.Subject = decodeMimeSentence(header.Get("Subject"))
 	email.From = hp.parseAddressList(header.Get("From"))
 	email.Sender = hp.parseAddress(header.Get("Sender"))
 	email.ReplyTo = hp.parseAddressList(header.Get("Reply-To"))
@@ -192,7 +192,7 @@ func parseMultipartMixed(msg io.Reader, boundary string) (textBody, htmlBody str
 	return textBody, htmlBody, attachments, embeddedFiles, err
 }
 
-func decodeMimeSentence(s string) (string, error) {
+func decodeMimeSentence(s string) string {
 	result := []string{}
 	ss := strings.Split(s, " ")
 
@@ -210,7 +210,7 @@ func decodeMimeSentence(s string) (string, error) {
 		result = append(result, w)
 	}
 
-	return strings.Join(result, ""), nil
+	return strings.Join(result, "")
 }
 
 func decodeHeaderMime(header mail.Header) (mail.Header, error) {
@@ -220,11 +220,7 @@ func decodeHeaderMime(header mail.Header) (mail.Header, error) {
 
 		parsedHeaderData := []string{}
 		for _, headerValue := range headerData {
-			decodedHeaderValue, err := decodeMimeSentence(headerValue)
-			if err != nil {
-				return mail.Header{}, err
-			}
-			parsedHeaderData = append(parsedHeaderData, decodedHeaderValue)
+			parsedHeaderData = append(parsedHeaderData, decodeMimeSentence(headerValue))
 		}
 
 		parsedHeader[headerName] = parsedHeaderData
@@ -254,11 +250,7 @@ func isEmbeddedFile(part *multipart.Part) bool {
 }
 
 func decodeEmbeddedFile(part *multipart.Part) (ef EmbeddedFile, err error) {
-	cid, err := decodeMimeSentence(part.Header.Get("Content-Id"))
-	if err != nil {
-		return
-	}
-
+	cid := decodeMimeSentence(part.Header.Get("Content-Id"))
 	decoded, err := decodePartData(part)
 	if err != nil {
 		return
@@ -276,11 +268,7 @@ func isAttachment(part *multipart.Part) bool {
 }
 
 func decodeAttachment(part *multipart.Part) (at Attachment, err error) {
-	filename, err := decodeMimeSentence(part.FileName())
-	if err != nil {
-		return
-	}
-
+	filename := decodeMimeSentence(part.FileName())
 	decoded, err := decodePartData(part)
 	if err != nil {
 		return
