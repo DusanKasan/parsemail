@@ -232,7 +232,7 @@ func decodeHeaderMime(header mail.Header) (mail.Header, error) {
 func decodePartData(part *multipart.Part) (io.Reader, error) {
 	encoding := part.Header.Get("Content-Transfer-Encoding")
 
-	if encoding == "base64" {
+	if strings.EqualFold(encoding, "base64") {
 		dr := base64.NewDecoder(base64.StdEncoding, part)
 		dd, err := ioutil.ReadAll(dr)
 		if err != nil {
