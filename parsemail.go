@@ -189,7 +189,7 @@ func parseMultipartAlternative(msg io.Reader, boundary string) (textBody, htmlBo
 
 			htmlBody += strings.TrimSuffix(string(ppContent[:]), "\n")
 		case contentTypeMultipartRelated:
-			tb, hb, ef, err := parseMultipartAlternative(part, params["boundary"])
+			tb, hb, ef, err := parseMultipartRelated(part, params["boundary"])
 			if err != nil {
 				return textBody, htmlBody, embeddedFiles, err
 			}
