@@ -41,7 +41,7 @@ for _, a := range(email.Attachments) {
 
 ## Retrieving embedded files
 
-You can access embedded files in the same way you can access attachments. THey contain the mime type, data stream and content id that is used to reference them through the email.
+You can access embedded files in the same way you can access attachments. They contain the mime type, data stream and content id that is used to reference them through the email.
 
 ```go
 var reader io.Reader
