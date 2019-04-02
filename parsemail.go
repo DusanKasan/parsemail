@@ -9,6 +9,7 @@ import (
 	"mime"
 	"mime/multipart"
 	"net/mail"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -375,6 +376,8 @@ func (hp headerParser) parseAddressList(s string) (ma []*mail.Address) {
 	return
 }
 
+var timezoneRegex = regexp.MustCompile(` \([A-Za-z0-9]+\)$`)
+
 func (hp headerParser) parseTime(s string) (t time.Time) {
 	if hp.err != nil || s == "" {
 		return
@@ -384,6 +387,8 @@ func (hp headerParser) parseTime(s string) (t time.Time) {
 	if hp.err == nil {
 		return t
 	}
+
+	s = timezoneRegex.ReplaceAllString(s, "")
 
 	t, hp.err = time.Parse("Mon, 2 Jan 2006 15:04:05 -0700", s)
 
