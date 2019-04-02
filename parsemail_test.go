@@ -3,6 +3,7 @@ package parsemail
 import (
 	"encoding/base64"
 	"io/ioutil"
+	"fmt"
 	"net/mail"
 	"strings"
 	"testing"
@@ -245,6 +246,33 @@ So, "Hello".`,
 				},
 			},
 		},
+		8: {
+			mailData: data3,
+			subject:  "Peter Foobar",
+			from: []mail.Address{
+				{
+					Name:    "Peter Foobar",
+					Address: "peter.foobar@gmail.com",
+				},
+			},
+			to: []mail.Address{
+				{
+					Name:    "",
+					Address: "dusan@kasan.sk",
+				},
+			},
+			messageID: "CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com",
+			date:      parseDate("Tue, 02 Apr 2019 11:12:26 +0000"),
+			htmlBody:  "<div dir=\"ltr\"><br></div>",
+			attachments: []attachmentData{
+				{
+					filename:    "unencoded.csv",
+					contentType: "application/csv",
+					unencodedData:  fmt.Sprintf("\n"+`"%s", "%s", "%s", "%s", "%s"`+"\n"+`"%s", "%s", "%s", "%s", "%s"`+"\n", "Some", "Data", "In", "Csv", "Format", "Foo", "Bar", "Baz", "Bum", "Poo"),
+				},
+			},
+		},
+
 	}
 
 	for index, td := range testData {
@@ -363,9 +391,16 @@ So, "Hello".`,
 					if err != nil {
 						t.Error(err)
 					}
-
-					encoded := base64.StdEncoding.EncodeToString(b)
-					if ra.Filename == ad.filename && encoded == ad.base64data && ra.ContentType == ad.contentType {
+					actual := "actual"
+					expected := "expected"
+					if ad.base64data != "" {
+						actual = base64.StdEncoding.EncodeToString(b)
+						expected = ad.base64data
+					} else if ad.unencodedData != "" {
+						actual = string(b)
+						expected = ad.unencodedData
+					}
+					if ra.Filename == ad.filename && actual == expected && ra.ContentType == ad.contentType {
 						found = true
 						attachs = append(attachs[:i], attachs[i+1:]...)
 					}
@@ -425,9 +460,10 @@ func parseDate(in string) time.Time {
 }
 
 type attachmentData struct {
-	filename    string
-	contentType string
-	base64data  string
+	filename      string
+	contentType   string
+	base64data    string
+	unencodedData string
 }
 
 type embeddedFileData struct {
@@ -581,6 +617,41 @@ YKUKF+Os3baUndC0pDnwNAmLy1SUr2Gw0luxQuV/AwC6cEhVV5VRrwAAAABJRU5ErkJggg==
 --------------5DB4A1356834BB602A5F88B2
 
 --------------C70C0458A558E585ACB75FB4--
+`
+
+var data3 = `From: =?UTF-8?Q?Peter_Foobar?= <peter.foobar@gmail.com>
+Date: Tue, 2 Apr 2019 11:12:26 +0000
+Message-ID: <CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com>
+Subject: =?UTF-8?Q?Peter_Foobar?=
+To: dusan@kasan.sk
+Content-Type: multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf
+
+--f403045f1dcc043a44054c8e6bbf
+Content-Type: multipart/alternative; boundary=f403045f1dcc043a3f054c8e6bbd
+
+--f403045f1dcc043a3f054c8e6bbd
+Content-Type: text/plain; charset=UTF-8
+
+
+
+--f403045f1dcc043a3f054c8e6bbd
+Content-Type: text/html; charset=UTF-8
+
+<div dir="ltr"><br></div>
+
+--f403045f1dcc043a3f054c8e6bbd--
+--f403045f1dcc043a44054c8e6bbf
+Content-Type: application/csv; 
+	name="unencoded.csv"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; 
+	filename="unencoded.csv"
+
+
+"Some", "Data", "In", "Csv", "Format"
+"Foo", "Bar", "Baz", "Bum", "Poo"
+
+--f403045f1dcc043a44054c8e6bbf--
 `
 
 var rfc5322exampleA11 = `From: John Doe <jdoe@machine.example>
