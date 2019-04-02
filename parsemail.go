@@ -302,6 +302,13 @@ func decodePartData(part *multipart.Part) (io.Reader, error) {
 		}
 
 		return bytes.NewReader(dd), nil
+	} else if strings.EqualFold(encoding, "7bit") {
+		dd, err := ioutil.ReadAll(part)
+		if err != nil {
+			return nil, err
+		}
+
+		return bytes.NewReader(dd), nil
 	}
 
 	return nil, fmt.Errorf("Unknown encoding: %s", encoding)
