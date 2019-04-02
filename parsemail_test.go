@@ -248,11 +248,7 @@ So, "Hello".`,
 	}
 
 	for index, td := range testData {
-		m, err := mail.ReadMessage(strings.NewReader(td.mailData))
-		if err != nil {
-			t.Error(err)
-		}
-		e, err := Parse(m)
+		e, err := Parse(strings.NewReader(td.mailData))
 		if err != nil {
 			t.Error(err)
 		}
