@@ -31,10 +31,12 @@ func Parse(r io.Reader) (email Email, err error) {
 		return
 	}
 
-	contentType, params, err := parseContentType(msg.Header.Get("Content-Type"))
+	email.ContentType = msg.Header.Get("Content-Type")
+	contentType, params, err := parseContentType(email.ContentType)
 	if err != nil {
 		return
 	}
+
 
 	switch contentType {
 	case contentTypeMultipartMixed:
@@ -48,7 +50,7 @@ func Parse(r io.Reader) (email Email, err error) {
 		message, _ := ioutil.ReadAll(msg.Body)
 		email.HTMLBody = strings.TrimSuffix(string(message[:]), "\n")
 	default:
-		err = fmt.Errorf("Unknown top level mime type: %s", contentType)
+		email.Content, err = decodeContent(msg.Body, msg.Header.Get("Content-Transfer-Encoding"))
 	}
 
 	return
@@ -291,29 +293,13 @@ func decodeHeaderMime(header mail.Header) (mail.Header, error) {
 	return mail.Header(parsedHeader), nil
 }
 
-func decodePartData(part *multipart.Part) (io.Reader, error) {
-	encoding := part.Header.Get("Content-Transfer-Encoding")
-
-	if strings.EqualFold(encoding, "base64") {
-		dr := base64.NewDecoder(base64.StdEncoding, part)
-		dd, err := ioutil.ReadAll(dr)
-		if err != nil {
-			return nil, err
-		}
-
-		return bytes.NewReader(dd), nil
-	}
-
-	return nil, fmt.Errorf("Unknown encoding: %s", encoding)
-}
-
 func isEmbeddedFile(part *multipart.Part) bool {
 	return part.Header.Get("Content-Transfer-Encoding") != ""
 }
 
 func decodeEmbeddedFile(part *multipart.Part) (ef EmbeddedFile, err error) {
 	cid := decodeMimeSentence(part.Header.Get("Content-Id"))
-	decoded, err := decodePartData(part)
+	decoded, err := decodeContent(part, part.Header.Get("Content-Transfer-Encoding"))
 	if err != nil {
 		return
 	}
@@ -331,7 +317,7 @@ func isAttachment(part *multipart.Part) bool {
 
 func decodeAttachment(part *multipart.Part) (at Attachment, err error) {
 	filename := decodeMimeSentence(part.FileName())
-	decoded, err := decodePartData(part)
+	decoded, err := decodeContent(part, part.Header.Get("Content-Transfer-Encoding"))
 	if err != nil {
 		return
 	}
@@ -341,6 +327,23 @@ func decodeAttachment(part *multipart.Part) (at Attachment, err error) {
 	at.ContentType = strings.Split(part.Header.Get("Content-Type"), ";")[0]
 
 	return
+}
+
+func decodeContent(content io.Reader, encoding string) (io.Reader, error) {
+	switch encoding {
+	case "base64":
+		decoded := base64.NewDecoder(base64.StdEncoding, content)
+		b, err := ioutil.ReadAll(decoded)
+		if err != nil {
+			return nil, err
+		}
+
+		return bytes.NewReader(b), nil
+	case "":
+		return content, nil
+	default:
+		return nil, fmt.Errorf("unknown encoding: %s", encoding)
+	}
 }
 
 type headerParser struct {
@@ -449,6 +452,9 @@ type Email struct {
 	ResentCc        []*mail.Address
 	ResentBcc       []*mail.Address
 	ResentMessageID string
+
+	ContentType string
+	Content io.Reader
 
 	HTMLBody string
 	TextBody string

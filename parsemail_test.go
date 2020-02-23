@@ -13,6 +13,8 @@ func TestParseEmail(t *testing.T) {
 	var testData = map[int]struct {
 		mailData string
 
+		contentType     string
+		content         string
 		subject         string
 		date            time.Time
 		from            []mail.Address
@@ -182,6 +184,8 @@ So, "Hello".`,
 		},
 		6: {
 			mailData: data1,
+			contentType: `multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf`,
+			content: "",
 			subject:  "Peter Paholík",
 			from: []mail.Address{
 				{
@@ -208,6 +212,8 @@ So, "Hello".`,
 		},
 		7: {
 			mailData: data2,
+			contentType: `multipart/alternative; boundary="------------C70C0458A558E585ACB75FB4"`,
+			content: "",
 			subject:  "Re: Test Subject 2",
 			from: []mail.Address{
 				{
@@ -245,16 +251,49 @@ So, "Hello".`,
 				},
 			},
 		},
+		8: {
+			mailData: imageContentExample,
+			subject:  "Saying Hello",
+			from: []mail.Address{
+				{
+					Name:    "John Doe",
+					Address: "jdoe@machine.example",
+				},
+			},
+			to: []mail.Address{
+				{
+					Name:    "Mary Smith",
+					Address: "mary@example.net",
+				},
+			},
+			sender: mail.Address{
+				Name:    "Michael Jones",
+				Address: "mjones@machine.example",
+			},
+			messageID: "1234@local.machine.example",
+			date:      parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
+			contentType: `image/jpeg; x-unix-mode=0644; name="image.gif"`,
+			content: `GIF89a;`,
+		},
 	}
 
 	for index, td := range testData {
-		m, err := mail.ReadMessage(strings.NewReader(td.mailData))
+		e, err := Parse(strings.NewReader(td.mailData))
 		if err != nil {
 			t.Error(err)
 		}
-		e, err := Parse(m)
-		if err != nil {
-			t.Error(err)
+
+		if td.contentType != e.ContentType {
+			t.Errorf("[Test Case %v] Wrong content type. Expected: %s, Got: %s", index, td.contentType, e.ContentType)
+		}
+
+		if td.content != "" {
+			b, err := ioutil.ReadAll(e.Content)
+			if err != nil {
+				t.Error(err)
+			} else if td.content != string(b) {
+				t.Errorf("[Test Case %v] Wrong content. Expected: %s, Got: %s", index, td.content, string(b))
+			}
 		}
 
 		if td.subject != e.Subject {
@@ -670,3 +709,16 @@ Message-ID: <1234@local.node.example>
 
 This is a message just to say hello.
 So, "Hello".`
+
+var imageContentExample = `From: John Doe <jdoe@machine.example>
+Sender: Michael Jones <mjones@machine.example>
+To: Mary Smith <mary@example.net>
+Subject: Saying Hello
+Date: Fri, 21 Nov 1997 09:55:06 -0600
+Message-ID: <1234@local.machine.example>
+Content-Type: image/jpeg;
+	x-unix-mode=0644;
+	name="image.gif"
+Content-Transfer-Encoding: base64
+
+R0lGODlhAQE7`
