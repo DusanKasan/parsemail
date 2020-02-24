@@ -234,6 +234,11 @@ func parseMultipartMixed(msg io.Reader, boundary string) (textBody, htmlBody str
 			if err != nil {
 				return textBody, htmlBody, attachments, embeddedFiles, err
 			}
+		} else if contentType == contentTypeTextPlain {
+			textBody, htmlBody, embeddedFiles, err = parseMultipartRelated(msg, boundary)
+			if err != nil {
+				return textBody, htmlBody, attachments, embeddedFiles, err
+			}
 		} else if contentType == contentTypeMultipartRelated {
 			textBody, htmlBody, embeddedFiles, err = parseMultipartRelated(part, params["boundary"])
 			if err != nil {
