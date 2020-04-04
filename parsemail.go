@@ -390,12 +390,19 @@ func (hp headerParser) parseTime(s string) (t time.Time) {
 		return
 	}
 
-	t, hp.err = time.Parse(time.RFC1123Z, s)
-	if hp.err == nil {
-		return t
+	formats := []string{
+		time.RFC1123Z,
+		"Mon, 2 Jan 2006 15:04:05 -0700",
+		time.RFC1123Z + " (MST)",
+		"Mon, 2 Jan 2006 15:04:05 -0700 (MST)",
 	}
 
-	t, hp.err = time.Parse("Mon, 2 Jan 2006 15:04:05 -0700", s)
+	for _, format := range formats {
+		t, hp.err = time.Parse(format, s)
+		if hp.err == nil {
+			return
+		}
+	}
 
 	return
 }

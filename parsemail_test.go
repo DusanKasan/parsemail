@@ -294,6 +294,42 @@ So, "Hello".`,
 			date:       parseDate("Fri, 02 May 2019 11:25:35 +0300"),
 			textBody: `plain text part`,
 		},
+		10: {
+			mailData: rfc5322exampleA12WithTimezone,
+			from: []mail.Address{
+				{
+					Name:    "Joe Q. Public",
+					Address: "john.q.public@example.com",
+				},
+			},
+			to: []mail.Address{
+				{
+					Name:    "Mary Smith",
+					Address: "mary@x.test",
+				},
+				{
+					Name:    "",
+					Address: "jdoe@example.org",
+				},
+				{
+					Name:    "Who?",
+					Address: "one@y.test",
+				},
+			},
+			cc: []mail.Address{
+				{
+					Name:    "",
+					Address: "boss@nil.test",
+				},
+				{
+					Name:    "Giant; \"Big\" Box",
+					Address: "sysservices@example.net",
+				},
+			},
+			messageID: "5678.21-Nov-1997@example.com",
+			date:      parseDate("Tue, 01 Jul 2003 10:52:37 +0200"),
+			textBody:  `Hi everyone.`,
+		},
 	}
 
 	for index, td := range testData {
@@ -677,6 +713,16 @@ Message-ID: <5678.21-Nov-1997@example.com>
 
 Hi everyone.
 `
+
+var rfc5322exampleA12WithTimezone = `From: "Joe Q. Public" <john.q.public@example.com>
+To: Mary Smith <mary@x.test>, jdoe@example.org, Who? <one@y.test>
+Cc: <boss@nil.test>, "Giant; \"Big\" Box" <sysservices@example.net>
+Date: Tue, 1 Jul 2003 10:52:37 +0200 (GMT)
+Message-ID: <5678.21-Nov-1997@example.com>
+
+Hi everyone.
+`
+
 
 //todo: not yet implemented in net/mail
 //once there is support for this, add it
