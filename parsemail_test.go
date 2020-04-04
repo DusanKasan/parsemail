@@ -275,6 +275,25 @@ So, "Hello".`,
 			contentType: `image/jpeg; x-unix-mode=0644; name="image.gif"`,
 			content: `GIF89a;`,
 		},
+		9: {
+			contentType: `multipart/mixed; boundary="0000000000007e2bb40587e36196"`,
+			mailData: textPlainInMultipart,
+			subject:  "Re: kern/54143 (virtualbox)",
+			from: []mail.Address{
+				{
+					Name:    "Rares",
+					Address: "rares@example.com",
+				},
+			},
+			to: []mail.Address{
+				{
+					Name:    "",
+					Address: "bugs@example.com",
+				},
+			},
+			date:       parseDate("Fri, 02 May 2019 11:25:35 +0300"),
+			textBody: `plain text part`,
+		},
 	}
 
 	for index, td := range testData {
@@ -624,6 +643,19 @@ YKUKF+Os3baUndC0pDnwNAmLy1SUr2Gw0luxQuV/AwC6cEhVV5VRrwAAAABJRU5ErkJggg==
 --------------5DB4A1356834BB602A5F88B2
 
 --------------C70C0458A558E585ACB75FB4--
+`
+
+var textPlainInMultipart = `From: Rares <rares@example.com>
+Date: Thu, 2 May 2019 11:25:35 +0300
+Subject: Re: kern/54143 (virtualbox)
+To: bugs@example.com
+Content-Type: multipart/mixed; boundary="0000000000007e2bb40587e36196"
+
+--0000000000007e2bb40587e36196
+Content-Type: text/plain; charset="UTF-8"
+
+plain text part
+--0000000000007e2bb40587e36196--
 `
 
 var rfc5322exampleA11 = `From: John Doe <jdoe@machine.example>
