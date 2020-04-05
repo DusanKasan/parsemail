@@ -2,6 +2,7 @@ package parsemail
 
 import (
 	"encoding/base64"
+	"fmt"
 	"io/ioutil"
 	"net/mail"
 	"strings"
@@ -458,6 +459,27 @@ So, "Hello".`,
 	}
 }
 
+func TestMultiPartRelatedEmail(t *testing.T) {
+	email, err := Parse(strings.NewReader(multipartRelatedExample))
+	if err != nil {
+		t.Errorf("[Test Multipart Related] Emailed failed to parse: %v", err)
+	}
+
+	if len(email.TextBody) == 0 {
+		t.Errorf("[Test Multipart Related] Failed to parse multipart related at the top level.")
+	}
+	body := "Time for the egg."
+	fmt.Println(email.TextBody)
+	if email.TextBody != body {
+		t.Errorf("Test Multipart Related] Body didn't match. \nExpected: %v,\nbut got: %v", body, email.TextBody)
+	}
+
+	html := "<div dir=\"ltr\"><div>Time for the egg.</div><div><br></div><div><br><br></div></div>"
+	if email.HTMLBody !=  html {
+		t.Errorf("Test Multipart Related] HTML didn't match. \nExpected: %v,\nbut got: %v", html, email.TextBody)
+	}
+}
+
 func parseDate(in string) time.Time {
 	out, err := time.Parse(time.RFC1123Z, in)
 	if err != nil {
@@ -722,3 +744,33 @@ Content-Type: image/jpeg;
 Content-Transfer-Encoding: base64
 
 R0lGODlhAQE7`
+
+var multipartRelatedExample = `MIME-Version: 1.0
+From: John Doe <jdoe@machine.example>
+Sender: Michael Jones <mjones@machine.example>
+To: Mary Smith <mary@example.net>
+Subject: Saying Hello
+Date: Fri, 21 Nov 1997 09:55:06 -0600
+Message-ID: <1234@local.machine.example>
+Subject: ooops
+To: test@example.rocks
+Content-Type: multipart/related; boundary="000000000000ab2e2205a26de587"
+
+--000000000000ab2e2205a26de587
+Content-Type: multipart/alternative; boundary="000000000000ab2e1f05a26de586"
+
+--000000000000ab2e1f05a26de586
+Content-Type: text/plain; charset="UTF-8"
+
+Time for the egg.
+
+--000000000000ab2e1f05a26de586
+Content-Type: text/html; charset="UTF-8"
+
+<div dir="ltr"><div>Time for the egg.</div><div><br></div><div><br><br></div></div>
+
+--000000000000ab2e1f05a26de586--
+
+
+--000000000000ab2e2205a26de587--
+`
