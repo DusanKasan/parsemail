@@ -184,10 +184,10 @@ So, "Hello".`,
 So, "Hello".`,
 		},
 		6: {
-			mailData: data1,
+			mailData:    data1,
 			contentType: `multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf`,
-			content: "",
-			subject:  "Peter Paholík",
+			content:     "",
+			subject:     "Peter Paholík",
 			from: []mail.Address{
 				{
 					Name:    "Peter Paholík",
@@ -205,17 +205,17 @@ So, "Hello".`,
 			htmlBody:  "<div dir=\"ltr\"><br></div>",
 			attachments: []attachmentData{
 				{
-					filename:    "Peter Paholík 1 4 2017 2017-04-07.pdf",
-					contentType: "application/pdf",
-					base64data:  "JVBERi0xLjQNCiW1tbW1DQoxIDAgb2JqDQo8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFIvTGFuZyhlbi1VUykgL1N0cnVjdFRyZWVSb290IDY3IDAgUi9NYXJrSW5mbzw8L01hcmtlZCB0cnVlPj4vT3V0cHV0SW50ZW50c1s8PC9UeXBlL091dHB1dEludGVudC9TL0dUU19QREZBMS9PdXRwdXRDb25kZXYgMzk1MzYyDQo+Pg0Kc3RhcnR4cmVmDQo0MTk4ODUNCiUlRU9GDQo=",
+					filename:    "Peter Paholík 1 4 2017 2017-04-07.json",
+					contentType: "application/json",
+					data:        "[1, 2, 3]",
 				},
 			},
 		},
 		7: {
-			mailData: data2,
+			mailData:    data2,
 			contentType: `multipart/alternative; boundary="------------C70C0458A558E585ACB75FB4"`,
-			content: "",
-			subject:  "Re: Test Subject 2",
+			content:     "",
+			subject:     "Re: Test Subject 2",
 			from: []mail.Address{
 				{
 					Name:    "Sender Man",
@@ -271,10 +271,92 @@ So, "Hello".`,
 				Name:    "Michael Jones",
 				Address: "mjones@machine.example",
 			},
-			messageID: "1234@local.machine.example",
-			date:      parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
+			messageID:   "1234@local.machine.example",
+			date:        parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
 			contentType: `image/jpeg; x-unix-mode=0644; name="image.gif"`,
-			content: `GIF89a;`,
+			content:     `GIF89a;`,
+		},
+		9: {
+			contentType: `multipart/mixed; boundary="0000000000007e2bb40587e36196"`,
+			mailData:    textPlainInMultipart,
+			subject:     "Re: kern/54143 (virtualbox)",
+			from: []mail.Address{
+				{
+					Name:    "Rares",
+					Address: "rares@example.com",
+				},
+			},
+			to: []mail.Address{
+				{
+					Name:    "",
+					Address: "bugs@example.com",
+				},
+			},
+			date:     parseDate("Fri, 02 May 2019 11:25:35 +0300"),
+			textBody: `plain text part`,
+		},
+		10: {
+			mailData: rfc5322exampleA12WithTimezone,
+			from: []mail.Address{
+				{
+					Name:    "Joe Q. Public",
+					Address: "john.q.public@example.com",
+				},
+			},
+			to: []mail.Address{
+				{
+					Name:    "Mary Smith",
+					Address: "mary@x.test",
+				},
+				{
+					Name:    "",
+					Address: "jdoe@example.org",
+				},
+				{
+					Name:    "Who?",
+					Address: "one@y.test",
+				},
+			},
+			cc: []mail.Address{
+				{
+					Name:    "",
+					Address: "boss@nil.test",
+				},
+				{
+					Name:    "Giant; \"Big\" Box",
+					Address: "sysservices@example.net",
+				},
+			},
+			messageID: "5678.21-Nov-1997@example.com",
+			date:      parseDate("Tue, 01 Jul 2003 10:52:37 +0200"),
+			textBody:  `Hi everyone.`,
+		},
+		11: {
+			contentType: "multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf",
+			mailData:    attachment7bit,
+			subject:     "Peter Foobar",
+			from: []mail.Address{
+				{
+					Name:    "Peter Foobar",
+					Address: "peter.foobar@gmail.com",
+				},
+			},
+			to: []mail.Address{
+				{
+					Name:    "",
+					Address: "dusan@kasan.sk",
+				},
+			},
+			messageID: "CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com",
+			date:      parseDate("Tue, 02 Apr 2019 11:12:26 +0000"),
+			htmlBody:  "<div dir=\"ltr\"><br></div>",
+			attachments: []attachmentData{
+				{
+					filename:      "unencoded.csv",
+					contentType:   "application/csv",
+					data: fmt.Sprintf("\n"+`"%s", "%s", "%s", "%s", "%s"`+"\n"+`"%s", "%s", "%s", "%s", "%s"`+"\n", "Some", "Data", "In", "Csv", "Format", "Foo", "Bar", "Baz", "Bum", "Poo"),
+				},
+			},
 		},
 	}
 
@@ -408,8 +490,7 @@ So, "Hello".`,
 						t.Error(err)
 					}
 
-					encoded := base64.StdEncoding.EncodeToString(b)
-					if ra.Filename == ad.filename && encoded == ad.base64data && ra.ContentType == ad.contentType {
+					if ra.Filename == ad.filename && string(b) == ad.data && ra.ContentType == ad.contentType {
 						found = true
 						attachs = append(attachs[:i], attachs[i+1:]...)
 					}
@@ -490,9 +571,9 @@ func parseDate(in string) time.Time {
 }
 
 type attachmentData struct {
-	filename    string
-	contentType string
-	base64data  string
+	filename      string
+	contentType   string
+	data          string
 }
 
 type embeddedFileData struct {
@@ -583,19 +664,16 @@ Content-Type: text/html; charset=UTF-8
 
 --f403045f1dcc043a3f054c8e6bbd--
 --f403045f1dcc043a44054c8e6bbf
-Content-Type: application/pdf;
+Content-Type: application/json;
 	name="=?UTF-8?Q?Peter_Paholi=CC=81k_1?=
-	=?UTF-8?Q?_4_2017_2017=2D04=2D07=2Epdf?="
+	=?UTF-8?Q?_4_2017_2017=2D04=2D07=2Ejson?="
 Content-Disposition: attachment;
 	filename="=?UTF-8?Q?Peter_Paholi=CC=81k_1?=
-	=?UTF-8?Q?_4_2017_2017=2D04=2D07=2Epdf?="
+	=?UTF-8?Q?_4_2017_2017=2D04=2D07=2Ejson?="
 Content-Transfer-Encoding: base64
 X-Attachment-Id: f_j17i0f0d0
 
-JVBERi0xLjQNCiW1tbW1DQoxIDAgb2JqDQo8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFIvTGFu
-Zyhlbi1VUykgL1N0cnVjdFRyZWVSb290IDY3IDAgUi9NYXJrSW5mbzw8L01hcmtlZCB0cnVlPj4v
-T3V0cHV0SW50ZW50c1s8PC9UeXBlL091dHB1dEludGVudC9TL0dUU19QREZBMS9PdXRwdXRDb25k
-ZXYgMzk1MzYyDQo+Pg0Kc3RhcnR4cmVmDQo0MTk4ODUNCiUlRU9GDQo=
+WzEsIDIsIDNd
 --f403045f1dcc043a44054c8e6bbf--
 `
 
@@ -648,6 +726,19 @@ YKUKF+Os3baUndC0pDnwNAmLy1SUr2Gw0luxQuV/AwC6cEhVV5VRrwAAAABJRU5ErkJggg==
 --------------C70C0458A558E585ACB75FB4--
 `
 
+var textPlainInMultipart = `From: Rares <rares@example.com>
+Date: Thu, 2 May 2019 11:25:35 +0300
+Subject: Re: kern/54143 (virtualbox)
+To: bugs@example.com
+Content-Type: multipart/mixed; boundary="0000000000007e2bb40587e36196"
+
+--0000000000007e2bb40587e36196
+Content-Type: text/plain; charset="UTF-8"
+
+plain text part
+--0000000000007e2bb40587e36196--
+`
+
 var rfc5322exampleA11 = `From: John Doe <jdoe@machine.example>
 Sender: Michael Jones <mjones@machine.example>
 To: Mary Smith <mary@example.net>
@@ -663,6 +754,15 @@ var rfc5322exampleA12 = `From: "Joe Q. Public" <john.q.public@example.com>
 To: Mary Smith <mary@x.test>, jdoe@example.org, Who? <one@y.test>
 Cc: <boss@nil.test>, "Giant; \"Big\" Box" <sysservices@example.net>
 Date: Tue, 1 Jul 2003 10:52:37 +0200
+Message-ID: <5678.21-Nov-1997@example.com>
+
+Hi everyone.
+`
+
+var rfc5322exampleA12WithTimezone = `From: "Joe Q. Public" <john.q.public@example.com>
+To: Mary Smith <mary@x.test>, jdoe@example.org, Who? <one@y.test>
+Cc: <boss@nil.test>, "Giant; \"Big\" Box" <sysservices@example.net>
+Date: Tue, 1 Jul 2003 10:52:37 +0200 (GMT)
 Message-ID: <5678.21-Nov-1997@example.com>
 
 Hi everyone.
@@ -773,4 +873,38 @@ Content-Type: text/html; charset="UTF-8"
 
 
 --000000000000ab2e2205a26de587--
+`
+var attachment7bit = `From: =?UTF-8?Q?Peter_Foobar?= <peter.foobar@gmail.com>
+Date: Tue, 2 Apr 2019 11:12:26 +0000
+Message-ID: <CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com>
+Subject: =?UTF-8?Q?Peter_Foobar?=
+To: dusan@kasan.sk
+Content-Type: multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf
+
+--f403045f1dcc043a44054c8e6bbf
+Content-Type: multipart/alternative; boundary=f403045f1dcc043a3f054c8e6bbd
+
+--f403045f1dcc043a3f054c8e6bbd
+Content-Type: text/plain; charset=UTF-8
+
+
+
+--f403045f1dcc043a3f054c8e6bbd
+Content-Type: text/html; charset=UTF-8
+
+<div dir="ltr"><br></div>
+
+--f403045f1dcc043a3f054c8e6bbd--
+--f403045f1dcc043a44054c8e6bbf
+Content-Type: application/csv; 
+	name="unencoded.csv"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; 
+	filename="unencoded.csv"
+
+
+"Some", "Data", "In", "Csv", "Format"
+"Foo", "Bar", "Baz", "Bum", "Poo"
+
+--f403045f1dcc043a44054c8e6bbf--
 `

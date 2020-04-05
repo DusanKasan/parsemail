@@ -37,7 +37,6 @@ func Parse(r io.Reader) (email Email, err error) {
 		return
 	}
 
-
 	switch contentType {
 	case contentTypeMultipartMixed:
 		email.TextBody, email.HTMLBody, email.Attachments, email.EmbeddedFiles, err = parseMultipartMixed(msg.Body, params["boundary"])
@@ -243,6 +242,13 @@ func parseMultipartMixed(msg io.Reader, boundary string) (textBody, htmlBody str
 			if err != nil {
 				return textBody, htmlBody, attachments, embeddedFiles, err
 			}
+		} else if contentType == contentTypeTextPlain {
+			ppContent, err := ioutil.ReadAll(part)
+			if err != nil {
+				return textBody, htmlBody, attachments, embeddedFiles, err
+			}
+
+			textBody += strings.TrimSuffix(string(ppContent[:]), "\n")
 		} else if isAttachment(part) {
 			at, err := decodeAttachment(part)
 			if err != nil {
@@ -341,6 +347,13 @@ func decodeContent(content io.Reader, encoding string) (io.Reader, error) {
 		}
 
 		return bytes.NewReader(b), nil
+	case "7bit":
+		dd, err := ioutil.ReadAll(content)
+		if err != nil {
+			return nil, err
+		}
+
+		return bytes.NewReader(dd), nil
 	case "":
 		return content, nil
 	default:
@@ -385,12 +398,19 @@ func (hp headerParser) parseTime(s string) (t time.Time) {
 		return
 	}
 
-	t, hp.err = time.Parse(time.RFC1123Z, s)
-	if hp.err == nil {
-		return t
+	formats := []string{
+		time.RFC1123Z,
+		"Mon, 2 Jan 2006 15:04:05 -0700",
+		time.RFC1123Z + " (MST)",
+		"Mon, 2 Jan 2006 15:04:05 -0700 (MST)",
 	}
 
-	t, hp.err = time.Parse("Mon, 2 Jan 2006 15:04:05 -0700", s)
+	for _, format := range formats {
+		t, hp.err = time.Parse(format, s)
+		if hp.err == nil {
+			return
+		}
+	}
 
 	return
 }
