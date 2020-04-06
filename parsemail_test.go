@@ -358,6 +358,31 @@ So, "Hello".`,
 				},
 			},
 		},
+		12: {
+			contentType: "multipart/related; boundary=\"000000000000ab2e2205a26de587\"",
+			mailData:   multipartRelatedExample,
+			subject:     "Saying Hello",
+			from: []mail.Address{
+				{
+					Name:    "John Doe",
+					Address: "jdoe@machine.example",
+				},
+			},
+			sender: mail.Address{
+				Name: "Michael Jones",
+				Address: "mjones@machine.example",
+			},
+			to: []mail.Address{
+				{
+					Name:    "Mary Smith",
+					Address: "mary@example.net",
+				},
+			},
+			messageID: "1234@local.machine.example",
+			date:      parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
+			htmlBody:  "<div dir=\"ltr\"><div>Time for the egg.</div><div><br></div><div><br><br></div></div>",
+			textBody: "Time for the egg.",
+		},
 	}
 
 	for index, td := range testData {
@@ -537,27 +562,6 @@ So, "Hello".`,
 				t.Errorf("[Test Case %v] Email contains %v unexpected embedded files: %v", index, len(embeds), embeds)
 			}
 		}
-	}
-}
-
-func TestMultiPartRelatedEmail(t *testing.T) {
-	email, err := Parse(strings.NewReader(multipartRelatedExample))
-	if err != nil {
-		t.Errorf("[Test Multipart Related] Emailed failed to parse: %v", err)
-	}
-
-	if len(email.TextBody) == 0 {
-		t.Errorf("[Test Multipart Related] Failed to parse multipart related at the top level.")
-	}
-	body := "Time for the egg."
-	fmt.Println(email.TextBody)
-	if email.TextBody != body {
-		t.Errorf("Test Multipart Related] Body didn't match. \nExpected: %v,\nbut got: %v", body, email.TextBody)
-	}
-
-	html := "<div dir=\"ltr\"><div>Time for the egg.</div><div><br></div><div><br><br></div></div>"
-	if email.HTMLBody !=  html {
-		t.Errorf("Test Multipart Related] HTML didn't match. \nExpected: %v,\nbut got: %v", html, email.TextBody)
 	}
 }
 
