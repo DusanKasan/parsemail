@@ -296,6 +296,26 @@ So, "Hello".`,
 			textBody: `plain text part`,
 		},
 		10: {
+			contentType: `multipart/mixed; boundary="0000000000007e2bb40587e36196"`,
+			mailData:    textHTMLInMultipart,
+			subject:     "Re: kern/54143 (virtualbox)",
+			from: []mail.Address{
+				{
+					Name:    "Rares",
+					Address: "rares@example.com",
+				},
+			},
+			to: []mail.Address{
+				{
+					Name:    "",
+					Address: "bugs@example.com",
+				},
+			},
+			date:     parseDate("Fri, 02 May 2019 11:25:35 +0300"),
+			textBody: ``,
+			htmlBody: "<div dir=\"ltr\"><div>html text part</div><div><br></div><div><br><br></div></div>",
+		},
+		11: {
 			mailData: rfc5322exampleA12WithTimezone,
 			from: []mail.Address{
 				{
@@ -331,7 +351,7 @@ So, "Hello".`,
 			date:      parseDate("Tue, 01 Jul 2003 10:52:37 +0200"),
 			textBody:  `Hi everyone.`,
 		},
-		11: {
+		12: {
 			contentType: "multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf",
 			mailData:    attachment7bit,
 			subject:     "Peter Foobar",
@@ -358,7 +378,7 @@ So, "Hello".`,
 				},
 			},
 		},
-		12: {
+		13: {
 			contentType: "multipart/related; boundary=\"000000000000ab2e2205a26de587\"",
 			mailData:   multipartRelatedExample,
 			subject:     "Saying Hello",
@@ -740,6 +760,20 @@ Content-Type: multipart/mixed; boundary="0000000000007e2bb40587e36196"
 Content-Type: text/plain; charset="UTF-8"
 
 plain text part
+--0000000000007e2bb40587e36196--
+`
+
+var textHTMLInMultipart = `From: Rares <rares@example.com>
+Date: Thu, 2 May 2019 11:25:35 +0300
+Subject: Re: kern/54143 (virtualbox)
+To: bugs@example.com
+Content-Type: multipart/mixed; boundary="0000000000007e2bb40587e36196"
+
+--0000000000007e2bb40587e36196
+Content-Type: text/html; charset="UTF-8"
+
+<div dir="ltr"><div>html text part</div><div><br></div><div><br><br></div></div>
+
 --0000000000007e2bb40587e36196--
 `
 
