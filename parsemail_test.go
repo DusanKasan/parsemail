@@ -403,6 +403,31 @@ So, "Hello".`,
 			htmlBody:  "<div dir=\"ltr\"><div>Time for the egg.</div><div><br></div><div><br><br></div></div>",
 			textBody: "Time for the egg.",
 		},
+		14: {
+			contentType: "multipart/alternative; boundary=\"000000000000ab2e1f05a26de586\"",
+			mailData:    base64Content,
+			subject:     "Saying Hello",
+			from: []mail.Address{
+				{
+					Name:    "John Doe",
+					Address: "jdoe@machine.example",
+				},
+			},
+			sender: mail.Address{
+				Name:    "Michael Jones",
+				Address: "mjones@machine.example",
+			},
+			to: []mail.Address{
+				{
+					Name:    "Mary Smith",
+					Address: "mary@example.net",
+				},
+			},
+			messageID: "1234@local.machine.example",
+			date:      parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
+			htmlBody:  "<div dir=\"ltr\">👍</div>",
+			textBody:  "👍",
+		},
 	}
 
 	for index, td := range testData {
@@ -945,4 +970,28 @@ Content-Disposition: attachment;
 "Foo", "Bar", "Baz", "Bum", "Poo"
 
 --f403045f1dcc043a44054c8e6bbf--
+`
+
+var base64Content = `MIME-Version: 1.0
+From: John Doe <jdoe@machine.example>
+Sender: Michael Jones <mjones@machine.example>
+To: Mary Smith <mary@example.net>
+Subject: Saying Hello
+Date: Fri, 21 Nov 1997 09:55:06 -0600
+Message-ID: <1234@local.machine.example>
+Content-Type: multipart/alternative; boundary="000000000000ab2e1f05a26de586"
+
+--000000000000ab2e1f05a26de586
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: base64
+
+8J+RjQo=
+
+--000000000000ab2e1f05a26de586
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: base64
+
+PGRpdiBkaXI9Imx0ciI+8J+RjTwvZGl2Pgo=
+
+--000000000000ab2e1f05a26de586--
 `
