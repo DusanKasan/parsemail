@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"mime"
 	"mime/multipart"
+	"mime/quotedprintable"
 	"net/mail"
 	"strings"
 	"time"
@@ -38,6 +39,8 @@ func Parse(r io.Reader) (email Email, err error) {
 		return
 	}
 
+	cte := msg.Header.Get("Content-Transfer-Encoding")
+
 	switch contentType {
 	case contentTypeMultipartMixed:
 		email.TextBody, email.HTMLBody, email.Attachments, email.EmbeddedFiles, err = parseMultipartMixed(msg.Body, params["boundary"])
@@ -47,14 +50,36 @@ func Parse(r io.Reader) (email Email, err error) {
 		email.TextBody, email.HTMLBody, email.EmbeddedFiles, err = parseMultipartRelated(msg.Body, params["boundary"])
 	case contentTypeTextPlain:
 		message, _ := ioutil.ReadAll(msg.Body)
+		var reader io.Reader
+		reader, err = decodeContent(strings.NewReader(string(message[:])), cte)
+		if err != nil {
+			return
+		}
+
+		message, err = ioutil.ReadAll(reader)
+		if err != nil {
+			return
+		}
+
 		email.TextBody = strings.TrimSuffix(string(message[:]), "\n")
 	case contentTypeTextHtml:
 		message, _ := ioutil.ReadAll(msg.Body)
+		var reader io.Reader
+		reader, err = decodeContent(strings.NewReader(string(message[:])), cte)
+		if err != nil {
+			return
+		}
+
+		message, err = ioutil.ReadAll(reader)
+		if err != nil {
+			return
+		}
+
 		email.HTMLBody = strings.TrimSuffix(string(message[:]), "\n")
 	case contentTypeOctetStream:
 		email.Attachments, err = parseAttachmentOnlyEmail(msg.Body, msg.Header)
 	default:
-		email.Content, err = decodeContent(msg.Body, msg.Header.Get("Content-Transfer-Encoding"))
+		email.Content, err = decodeContent(msg.Body, cte)
 	}
 
 	return
@@ -134,13 +159,15 @@ func parseAttachmentOnlyEmail(body io.Reader, header mail.Header) (attachments [
 func parseMultipartRelated(msg io.Reader, boundary string) (textBody, htmlBody string, embeddedFiles []EmbeddedFile, err error) {
 	pmr := multipart.NewReader(msg, boundary)
 	for {
-		part, err := pmr.NextPart()
+		part, err := pmr.NextRawPart()
 
 		if err == io.EOF {
 			break
 		} else if err != nil {
 			return textBody, htmlBody, embeddedFiles, err
 		}
+
+		cte := part.Header.Get("Content-Transfer-Encoding")
 
 		contentType, params, err := mime.ParseMediaType(part.Header.Get("Content-Type"))
 		if err != nil {
@@ -149,14 +176,22 @@ func parseMultipartRelated(msg io.Reader, boundary string) (textBody, htmlBody s
 
 		switch contentType {
 		case contentTypeTextPlain:
-			ppContent, err := ioutil.ReadAll(part)
+			decoded, err := decodeContent(part, cte)
+			if err != nil {
+				return textBody, htmlBody, embeddedFiles, err
+			}
+			ppContent, err := ioutil.ReadAll(decoded)
 			if err != nil {
 				return textBody, htmlBody, embeddedFiles, err
 			}
 
 			textBody += strings.TrimSuffix(string(ppContent[:]), "\n")
 		case contentTypeTextHtml:
-			ppContent, err := ioutil.ReadAll(part)
+			decoded, err := decodeContent(part, cte)
+			if err != nil {
+				return textBody, htmlBody, embeddedFiles, err
+			}
+			ppContent, err := ioutil.ReadAll(decoded)
 			if err != nil {
 				return textBody, htmlBody, embeddedFiles, err
 			}
@@ -191,13 +226,15 @@ func parseMultipartRelated(msg io.Reader, boundary string) (textBody, htmlBody s
 func parseMultipartAlternative(msg io.Reader, boundary string) (textBody, htmlBody string, embeddedFiles []EmbeddedFile, err error) {
 	pmr := multipart.NewReader(msg, boundary)
 	for {
-		part, err := pmr.NextPart()
+		part, err := pmr.NextRawPart()
 
 		if err == io.EOF {
 			break
 		} else if err != nil {
 			return textBody, htmlBody, embeddedFiles, err
 		}
+
+		cte := part.Header.Get("Content-Transfer-Encoding")
 
 		contentType, params, err := mime.ParseMediaType(part.Header.Get("Content-Type"))
 		if err != nil {
@@ -206,14 +243,22 @@ func parseMultipartAlternative(msg io.Reader, boundary string) (textBody, htmlBo
 
 		switch contentType {
 		case contentTypeTextPlain:
-			ppContent, err := ioutil.ReadAll(part)
+			decoded, err := decodeContent(part, cte)
+			if err != nil {
+				return textBody, htmlBody, embeddedFiles, err
+			}
+			ppContent, err := ioutil.ReadAll(decoded)
 			if err != nil {
 				return textBody, htmlBody, embeddedFiles, err
 			}
 
 			textBody += strings.TrimSuffix(string(ppContent[:]), "\n")
 		case contentTypeTextHtml:
-			ppContent, err := ioutil.ReadAll(part)
+			decoded, err := decodeContent(part, cte)
+			if err != nil {
+				return textBody, htmlBody, embeddedFiles, err
+			}
+			ppContent, err := ioutil.ReadAll(decoded)
 			if err != nil {
 				return textBody, htmlBody, embeddedFiles, err
 			}
@@ -248,7 +293,7 @@ func parseMultipartAlternative(msg io.Reader, boundary string) (textBody, htmlBo
 func parseMultipartMixed(msg io.Reader, boundary string) (textBody, htmlBody string, attachments []Attachment, embeddedFiles []EmbeddedFile, err error) {
 	mr := multipart.NewReader(msg, boundary)
 	for {
-		part, err := mr.NextPart()
+		part, err := mr.NextRawPart()
 		if err == io.EOF {
 			break
 		} else if err != nil {
@@ -265,9 +310,19 @@ func parseMultipartMixed(msg io.Reader, boundary string) (textBody, htmlBody str
 			continue
 		}
 
+		cte := part.Header.Get("Content-Transfer-Encoding")
+
 		contentType, params, err := mime.ParseMediaType(part.Header.Get("Content-Type"))
 		if err != nil {
 			return textBody, htmlBody, attachments, embeddedFiles, err
+		}
+
+		if isAttachment(part) {
+			at, err := decodeAttachment(part)
+			if err != nil {
+				return textBody, htmlBody, attachments, embeddedFiles, err
+			}
+			attachments = append(attachments, at)
 		}
 
 		if contentType == contentTypeMultipartAlternative {
@@ -281,14 +336,22 @@ func parseMultipartMixed(msg io.Reader, boundary string) (textBody, htmlBody str
 				return textBody, htmlBody, attachments, embeddedFiles, err
 			}
 		} else if contentType == contentTypeTextPlain {
-			ppContent, err := ioutil.ReadAll(part)
+			decoded, err := decodeContent(part, cte)
+			if err != nil {
+				return textBody, htmlBody, attachments, embeddedFiles, err
+			}
+			ppContent, err := ioutil.ReadAll(decoded)
 			if err != nil {
 				return textBody, htmlBody, attachments, embeddedFiles, err
 			}
 
 			textBody += strings.TrimSuffix(string(ppContent[:]), "\n")
 		} else if contentType == contentTypeTextHtml {
-			ppContent, err := ioutil.ReadAll(part)
+			decoded, err := decodeContent(part, cte)
+			if err != nil {
+				return textBody, htmlBody, attachments, embeddedFiles, err
+			}
+			ppContent, err := ioutil.ReadAll(decoded)
 			if err != nil {
 				return textBody, htmlBody, attachments, embeddedFiles, err
 			}
@@ -383,17 +446,25 @@ func decodeContent(content io.Reader, encoding string) (io.Reader, error) {
 		if err != nil {
 			return nil, err
 		}
-
 		return bytes.NewReader(b), nil
-	case "7bit", "8bit", "binary:
-		dd, err := ioutil.ReadAll(content)
+	case "quoted-printable":
+		decoded := quotedprintable.NewReader(content)
+		b, err := ioutil.ReadAll(decoded)
 		if err != nil {
 			return nil, err
 		}
-
-		return bytes.NewReader(dd), nil
-	case "":
-		return content, nil
+		return bytes.NewReader(b), nil
+	// The values "8bit", "7bit", and "binary" all imply that NO encoding has been performed and data need to be read as bytes.
+	// "7bit" means that the data is all represented as short lines of US-ASCII data.
+	// "8bit" means that the lines are short, but there may be non-ASCII characters (octets with the high-order bit set).
+	// "Binary" means that not only may non-ASCII characters be present, but also that the lines are not necessarily short enough for SMTP transport.
+	case "", "7bit", "8bit", "binary":
+		decoded := quotedprintable.NewReader(content)
+		b, err := ioutil.ReadAll(decoded)
+		if err != nil {
+			return nil, err
+		}
+		return bytes.NewReader(b), nil
 	default:
 		return nil, fmt.Errorf("unknown encoding: %s", encoding)
 	}
