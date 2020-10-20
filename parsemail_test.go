@@ -274,7 +274,7 @@ So, "Hello".`,
 			messageID:   "1234@local.machine.example",
 			date:        parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
 			contentType: `image/jpeg; x-unix-mode=0644; name="image.gif"`,
-			content:     `GIF89a;`,
+			content: `GIF89a;`,
 		},
 		9: {
 			contentType: `multipart/mixed; boundary="0000000000007e2bb40587e36196"`,
@@ -372,15 +372,15 @@ So, "Hello".`,
 			htmlBody:  "<div dir=\"ltr\"><br></div>",
 			attachments: []attachmentData{
 				{
-					filename:      "unencoded.csv",
-					contentType:   "application/csv",
-					data: fmt.Sprintf("\n"+`"%s", "%s", "%s", "%s", "%s"`+"\n"+`"%s", "%s", "%s", "%s", "%s"`+"\n", "Some", "Data", "In", "Csv", "Format", "Foo", "Bar", "Baz", "Bum", "Poo"),
+					filename:    "unencoded.csv",
+					contentType: "application/csv",
+					data:        fmt.Sprintf("\n"+`"%s", "%s", "%s", "%s", "%s"`+"\n"+`"%s", "%s", "%s", "%s", "%s"`+"\n", "Some", "Data", "In", "Csv", "Format", "Foo", "Bar", "Baz", "Bum", "Poo"),
 				},
 			},
 		},
 		13: {
 			contentType: "multipart/related; boundary=\"000000000000ab2e2205a26de587\"",
-			mailData:   multipartRelatedExample,
+			mailData:    multipartRelatedExample,
 			subject:     "Saying Hello",
 			from: []mail.Address{
 				{
@@ -389,7 +389,7 @@ So, "Hello".`,
 				},
 			},
 			sender: mail.Address{
-				Name: "Michael Jones",
+				Name:    "Michael Jones",
 				Address: "mjones@machine.example",
 			},
 			to: []mail.Address{
@@ -401,7 +401,32 @@ So, "Hello".`,
 			messageID: "1234@local.machine.example",
 			date:      parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
 			htmlBody:  "<div dir=\"ltr\"><div>Time for the egg.</div><div><br></div><div><br><br></div></div>",
-			textBody: "Time for the egg.",
+			textBody:  "Time for the egg.",
+		},
+		14: {
+			contentType: "multipart/alternative; boundary=\"000000000000ab2e1f05a26de586\"",
+			mailData:    base64Content,
+			subject:     "Saying Hello",
+			from: []mail.Address{
+				{
+					Name:    "John Doe",
+					Address: "jdoe@machine.example",
+				},
+			},
+			sender: mail.Address{
+				Name:    "Michael Jones",
+				Address: "mjones@machine.example",
+			},
+			to: []mail.Address{
+				{
+					Name:    "Mary Smith",
+					Address: "mary@example.net",
+				},
+			},
+			messageID: "1234@local.machine.example",
+			date:      parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
+			htmlBody:  "<div dir=\"ltr\">👍</div>",
+			textBody:  "👍",
 		},
 	}
 
@@ -595,9 +620,9 @@ func parseDate(in string) time.Time {
 }
 
 type attachmentData struct {
-	filename      string
-	contentType   string
-	data          string
+	filename    string
+	contentType string
+	data        string
 }
 
 type embeddedFileData struct {
@@ -879,7 +904,7 @@ Message-ID: <1234@local.machine.example>
 Content-Type: image/jpeg;
 	x-unix-mode=0644;
 	name="image.gif"
-Content-Transfer-Encoding: base64
+Content-Transfer-Encoding: Base64
 
 R0lGODlhAQE7`
 
@@ -945,4 +970,28 @@ Content-Disposition: attachment;
 "Foo", "Bar", "Baz", "Bum", "Poo"
 
 --f403045f1dcc043a44054c8e6bbf--
+`
+
+var base64Content = `MIME-Version: 1.0
+From: John Doe <jdoe@machine.example>
+Sender: Michael Jones <mjones@machine.example>
+To: Mary Smith <mary@example.net>
+Subject: Saying Hello
+Date: Fri, 21 Nov 1997 09:55:06 -0600
+Message-ID: <1234@local.machine.example>
+Content-Type: multipart/alternative; boundary="000000000000ab2e1f05a26de586"
+
+--000000000000ab2e1f05a26de586
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: base64
+
+8J+RjQo=
+
+--000000000000ab2e1f05a26de586
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: base64
+
+PGRpdiBkaXI9Imx0ciI+8J+RjTwvZGl2Pgo=
+
+--000000000000ab2e1f05a26de586--
 `
