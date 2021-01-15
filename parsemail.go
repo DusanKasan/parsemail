@@ -107,14 +107,15 @@ func parseContentType(contentTypeHeader string) (contentType string, params map[
 }
 
 func parseAttachmentOnlyEmail(body io.Reader, header mail.Header) (attachments []Attachment, err error) {
-	attachmentData, err := decodeContent(body, header.Get("Content-Transfer-Encoding"))
 	contentDisposition := header.Get("Content-Disposition")
 
-	if err != nil {
-		return attachments, err
-	}
-
 	if len(contentDisposition) > 0 && strings.Contains(contentDisposition, "attachment;") {
+
+		attachmentData, err := decodeContent(body, header.Get("Content-Transfer-Encoding"))
+		if err != nil {
+			return attachments, err
+		}
+
 		fileName := strings.Replace(contentDisposition, "attachment; filename=\"", "", -1)
 		fileName = strings.TrimRight(fileName, "\"")
 
@@ -123,6 +124,7 @@ func parseAttachmentOnlyEmail(body io.Reader, header mail.Header) (attachments [
 			ContentType: "application/octet-stream",
 			Data:        attachmentData,
 		}
+
 		attachments = append(attachments, at)
 	}
 
