@@ -16,8 +16,12 @@ import (
 const contentTypeMultipartMixed = "multipart/mixed"
 const contentTypeMultipartAlternative = "multipart/alternative"
 const contentTypeMultipartRelated = "multipart/related"
+const contentTypeMultipartSigned = "multipart/signed"
 const contentTypeTextHtml = "text/html"
 const contentTypeTextPlain = "text/plain"
+
+// this is a "special" content-type
+const contentAttachment = "attachment"
 
 // Parse an email message read from io.Reader into parsemail.Email struct
 func Parse(r io.Reader) (email Email, err error) {
@@ -40,6 +44,8 @@ func Parse(r io.Reader) (email Email, err error) {
 	switch contentType {
 	case contentTypeMultipartMixed:
 		email.TextBody, email.HTMLBody, email.Attachments, email.EmbeddedFiles, err = parseMultipartMixed(msg.Body, params["boundary"])
+	case contentTypeMultipartSigned:
+		email.TextBody, email.HTMLBody, email.Attachments, email.EmbeddedFiles, err = parseMultipartSigned(msg.Body, params["boundary"])
 	case contentTypeMultipartAlternative:
 		email.TextBody, email.HTMLBody, email.EmbeddedFiles, err = parseMultipartAlternative(msg.Body, params["boundary"])
 	case contentTypeMultipartRelated:
@@ -219,9 +225,11 @@ func parseMultipartAlternative(msg io.Reader, boundary string) (textBody, htmlBo
 
 func parseMultipartMixed(msg io.Reader, boundary string) (textBody, htmlBody string, attachments []Attachment, embeddedFiles []EmbeddedFile, err error) {
 	mr := multipart.NewReader(msg, boundary)
+
 	for {
 		part, err := mr.NextPart()
 		if err == io.EOF {
+			err = nil
 			break
 		} else if err != nil {
 			return textBody, htmlBody, attachments, embeddedFiles, err
@@ -232,43 +240,110 @@ func parseMultipartMixed(msg io.Reader, boundary string) (textBody, htmlBody str
 			return textBody, htmlBody, attachments, embeddedFiles, err
 		}
 
-		if contentType == contentTypeMultipartAlternative {
+		switch contentType {
+
+		case contentTypeMultipartAlternative:
 			textBody, htmlBody, embeddedFiles, err = parseMultipartAlternative(part, params["boundary"])
 			if err != nil {
 				return textBody, htmlBody, attachments, embeddedFiles, err
 			}
-		} else if contentType == contentTypeMultipartRelated {
+
+		case contentTypeMultipartRelated:
 			textBody, htmlBody, embeddedFiles, err = parseMultipartRelated(part, params["boundary"])
 			if err != nil {
 				return textBody, htmlBody, attachments, embeddedFiles, err
 			}
-		} else if contentType == contentTypeTextPlain {
+
+		case contentTypeTextPlain:
 			ppContent, err := ioutil.ReadAll(part)
 			if err != nil {
 				return textBody, htmlBody, attachments, embeddedFiles, err
 			}
 
 			textBody += strings.TrimSuffix(string(ppContent[:]), "\n")
-		} else if contentType == contentTypeTextHtml {
+
+		case contentTypeTextHtml:
 			ppContent, err := ioutil.ReadAll(part)
 			if err != nil {
 				return textBody, htmlBody, attachments, embeddedFiles, err
 			}
 
 			htmlBody += strings.TrimSuffix(string(ppContent[:]), "\n")
-		} else if isAttachment(part) {
+
+		case isAttachmentAsString(contentType, part):
 			at, err := decodeAttachment(part)
 			if err != nil {
 				return textBody, htmlBody, attachments, embeddedFiles, err
 			}
 
 			attachments = append(attachments, at)
-		} else {
+		default:
 			return textBody, htmlBody, attachments, embeddedFiles, fmt.Errorf("Unknown multipart/mixed nested mime type: %s", contentType)
 		}
 	}
 
 	return textBody, htmlBody, attachments, embeddedFiles, err
+}
+
+func parseMultipartSigned(msg io.Reader, boundary string) (textBody, htmlBody string, attachments []Attachment, embeddedFiles []EmbeddedFile, err error) {
+
+	// vars
+	err = nil
+	var part *multipart.Part
+	var contentType string
+	var params map[string]string
+
+	// reader
+	mr := multipart.NewReader(msg, boundary)
+
+mrparts:
+	for {
+		part, err = mr.NextPart()
+		if err == io.EOF {
+			err = nil
+			break
+		} else if err != nil {
+			return
+		}
+
+		contentType, params, err = mime.ParseMediaType(part.Header.Get("Content-Type"))
+		if err != nil {
+			return
+		}
+
+		switch contentType {
+
+		case contentTypeMultipartMixed:
+			if textBody, htmlBody, attachments, embeddedFiles, err = parseMultipartMixed(part, params["boundary"]); err != nil {
+				break mrparts
+			}
+
+		case contentTypeMultipartAlternative:
+			if textBody, htmlBody, embeddedFiles, err = parseMultipartAlternative(part, params["boundary"]); err != nil {
+				break mrparts
+			}
+
+		case contentTypeMultipartRelated:
+			if textBody, htmlBody, embeddedFiles, err = parseMultipartRelated(part, params["boundary"]); err != nil {
+				break mrparts
+			}
+
+		case isAttachmentAsString(contentType, part):
+			at, err := decodeAttachment(part)
+			if err != nil {
+				return textBody, htmlBody, attachments, embeddedFiles, err
+			}
+
+			attachments = append(attachments, at)
+
+		default:
+			err = fmt.Errorf("Unknown multipart/mixed nested mime type: %s", contentType)
+			return
+		}
+
+	}
+
+	return
 }
 
 func decodeMimeSentence(s string) string {
@@ -328,6 +403,14 @@ func decodeEmbeddedFile(part *multipart.Part) (ef EmbeddedFile, err error) {
 
 func isAttachment(part *multipart.Part) bool {
 	return part.FileName() != ""
+}
+
+func isAttachmentAsString(contentType string, part *multipart.Part) string {
+	if isAttachment(part) == true {
+		return contentType
+	}
+
+	return ""
 }
 
 func decodeAttachment(part *multipart.Part) (at Attachment, err error) {
@@ -483,7 +566,7 @@ type Email struct {
 	ResentMessageID string
 
 	ContentType string
-	Content io.Reader
+	Content     io.Reader
 
 	HTMLBody string
 	TextBody string
