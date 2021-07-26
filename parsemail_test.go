@@ -274,7 +274,7 @@ So, "Hello".`,
 			messageID:   "1234@local.machine.example",
 			date:        parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
 			contentType: `image/jpeg; x-unix-mode=0644; name="image.gif"`,
-			content:     `GIF89a;`,
+			content: `GIF89a;`,
 		},
 		9: {
 			contentType: `multipart/mixed; boundary="0000000000007e2bb40587e36196"`,
@@ -372,15 +372,15 @@ So, "Hello".`,
 			htmlBody:  "<div dir=\"ltr\"><br></div>",
 			attachments: []attachmentData{
 				{
-					filename:      "unencoded.csv",
-					contentType:   "application/csv",
-					data: fmt.Sprintf("\n"+`"%s", "%s", "%s", "%s", "%s"`+"\n"+`"%s", "%s", "%s", "%s", "%s"`+"\n", "Some", "Data", "In", "Csv", "Format", "Foo", "Bar", "Baz", "Bum", "Poo"),
+					filename:    "unencoded.csv",
+					contentType: "application/csv",
+					data:        fmt.Sprintf("\n"+`"%s", "%s", "%s", "%s", "%s"`+"\n"+`"%s", "%s", "%s", "%s", "%s"`+"\n", "Some", "Data", "In", "Csv", "Format", "Foo", "Bar", "Baz", "Bum", "Poo"),
 				},
 			},
 		},
 		13: {
 			contentType: "multipart/related; boundary=\"000000000000ab2e2205a26de587\"",
-			mailData:   multipartRelatedExample,
+			mailData:    multipartRelatedExample,
 			subject:     "Saying Hello",
 			from: []mail.Address{
 				{
@@ -389,7 +389,7 @@ So, "Hello".`,
 				},
 			},
 			sender: mail.Address{
-				Name: "Michael Jones",
+				Name:    "Michael Jones",
 				Address: "mjones@machine.example",
 			},
 			to: []mail.Address{
@@ -401,7 +401,35 @@ So, "Hello".`,
 			messageID: "1234@local.machine.example",
 			date:      parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
 			htmlBody:  "<div dir=\"ltr\"><div>Time for the egg.</div><div><br></div><div><br><br></div></div>",
-			textBody: "Time for the egg.",
+			textBody:  "Time for the egg.",
+		},
+		14: {
+			mailData:    data3,
+			contentType: `multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf`,
+			content:     "",
+			subject:     "Peter Paholík",
+			from: []mail.Address{
+				{
+					Name:    "Peter Paholík",
+					Address: "peter.paholik@gmail.com",
+				},
+			},
+			to: []mail.Address{
+				{
+					Name:    "",
+					Address: "dusan@kasan.sk",
+				},
+			},
+			messageID: "CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com",
+			date:      parseDate("Fri, 07 Apr 2017 09:17:26 +0200"),
+			htmlBody:  "<div dir=\"ltr\"><br></div>",
+			attachments: []attachmentData{
+				{
+					filename:    "Peter Paholík 1 4 2017 2017-04-07.json",
+					contentType: "application/json",
+					data:        "[1, 2, 3]",
+				},
+			},
 		},
 	}
 
@@ -595,9 +623,9 @@ func parseDate(in string) time.Time {
 }
 
 type attachmentData struct {
-	filename      string
-	contentType   string
-	data          string
+	filename    string
+	contentType string
+	data        string
 }
 
 type embeddedFileData struct {
@@ -748,6 +776,39 @@ YKUKF+Os3baUndC0pDnwNAmLy1SUr2Gw0luxQuV/AwC6cEhVV5VRrwAAAABJRU5ErkJggg==
 --------------5DB4A1356834BB602A5F88B2
 
 --------------C70C0458A558E585ACB75FB4--
+`
+
+var data3 = `From: =?UTF-8?Q?Peter_Pahol=C3=ADk?= <peter.paholik@gmail.com>
+Date: Fri, 7 Apr 2017 09:17:26 +0200
+Message-ID: <CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com>
+Subject: =?UTF-8?Q?Peter_Pahol=C3=ADk?=
+To: dusan@kasan.sk
+Content-Type: multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf
+
+--f403045f1dcc043a44054c8e6bbf
+Content-Type: multipart/alternative; boundary=f403045f1dcc043a3f054c8e6bbd
+
+--f403045f1dcc043a3f054c8e6bbd
+Content-Type: text/plain; charset=UTF-8
+
+
+
+--f403045f1dcc043a3f054c8e6bbd
+Content-Type: text/html; charset=UTF-8
+
+<div dir="ltr"><br></div>
+
+--f403045f1dcc043a3f054c8e6bbd--
+--f403045f1dcc043a44054c8e6bbf
+Content-Type: application/json;
+	name="=?UTF-8?Q?Peter_Paholi=CC=81k_1?=
+	=?UTF-8?Q?_4_2017_2017=2D04=2D07=2Ejson?="
+Content-Disposition: attachment
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_j17i0f0d0
+
+WzEsIDIsIDNd
+--f403045f1dcc043a44054c8e6bbf--
 `
 
 var textPlainInMultipart = `From: Rares <rares@example.com>
