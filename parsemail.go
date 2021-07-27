@@ -326,12 +326,24 @@ func decodeEmbeddedFile(part *multipart.Part) (ef EmbeddedFile, err error) {
 	return
 }
 
+func partFileName(part *multipart.Part) string {
+	if part.FileName() != "" {
+		return part.FileName()
+	}
+	v := part.Header.Get("Content-Type")
+	_, contentTypeParams, err := mime.ParseMediaType(v)
+	if err != nil {
+		return ""
+	}
+	return contentTypeParams["name"]
+}
+
 func isAttachment(part *multipart.Part) bool {
-	return part.FileName() != ""
+	return partFileName(part) != ""
 }
 
 func decodeAttachment(part *multipart.Part) (at Attachment, err error) {
-	filename := decodeMimeSentence(part.FileName())
+	filename := decodeMimeSentence(partFileName(part))
 	decoded, err := decodeContent(part, part.Header.Get("Content-Transfer-Encoding"))
 	if err != nil {
 		return
