@@ -1,0 +1,14 @@
+# Binaries
+bin/
+*debug*bin
+
+# Env variables
+.envrc
+.env
+
+# IDEs
+.idea/
+*.iml
+.DS_Store
+.vscode/
+*.code-workspace
