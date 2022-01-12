@@ -458,6 +458,34 @@ So, "Hello".`,
 				},
 			},
 		},
+		16: {
+			mailData:    data4,
+			contentType: `multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf`,
+			content:     "",
+			subject:     "Peter Paholík",
+			from: []mail.Address{
+				{
+					Name:    "Peter Paholík",
+					Address: "peter.paholik@gmail.com",
+				},
+			},
+			to: []mail.Address{
+				{
+					Name:    "",
+					Address: "dusan@kasan.sk",
+				},
+			},
+			messageID: "CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com",
+			date:      parseDate("Fri, 07 Apr 2017 09:17:26 +0200"),
+			htmlBody:  "<div dir=\"ltr\"><br></div>",
+			attachments: []attachmentData{
+				{
+					filename:    "Peter Paholík 1 4 2017 2017-04-07.json",
+					contentType: "application/json",
+					data:        "[1, 2, 3]",
+				},
+			},
+		},
 	}
 
 	for index, td := range testData {
@@ -817,6 +845,39 @@ Content-Type: multipart/alternative; boundary=f403045f1dcc043a3f054c8e6bbd
 
 --f403045f1dcc043a3f054c8e6bbd
 Content-Type: text/plain; charset=UTF-8
+
+
+
+--f403045f1dcc043a3f054c8e6bbd
+Content-Type: text/html; charset=UTF-8
+
+<div dir="ltr"><br></div>
+
+--f403045f1dcc043a3f054c8e6bbd--
+--f403045f1dcc043a44054c8e6bbf
+Content-Type: application/json;
+	name="=?UTF-8?Q?Peter_Paholi=CC=81k_1?=
+	=?UTF-8?Q?_4_2017_2017=2D04=2D07=2Ejson?="
+Content-Disposition: attachment
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_j17i0f0d0
+
+WzEsIDIsIDNd
+--f403045f1dcc043a44054c8e6bbf--
+`
+
+var data4 = `From: =?UTF-8?Q?Peter_Pahol=C3=ADk?= <peter.paholik@gmail.com>
+Date: Fri, 7 Apr 2017 09:17:26 +0200
+Message-ID: <CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com>
+Subject: =?UTF-8?Q?Peter_Pahol=C3=ADk?=
+To: dusan@kasan.sk
+Content-Type: multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf
+
+--f403045f1dcc043a44054c8e6bbf
+Content-Type: multipart/alternative; boundary=f403045f1dcc043a3f054c8e6bbd
+
+--f403045f1dcc043a3f054c8e6bbd
+Content-Transfer-Encoding: 7bit
 
 
 

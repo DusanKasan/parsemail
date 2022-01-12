@@ -114,7 +114,12 @@ func parseMultipartRelated(msg io.Reader, boundary string) (textBody, htmlBody s
 			return textBody, htmlBody, embeddedFiles, err
 		}
 
-		contentType, params, err := mime.ParseMediaType(part.Header.Get("Content-Type"))
+		hContentType := strings.TrimSpace(part.Header.Get("Content-Type"))
+		if len(hContentType) == 0 {
+			continue
+		}
+
+		contentType, params, err := mime.ParseMediaType(hContentType)
 		if err != nil {
 			return textBody, htmlBody, embeddedFiles, err
 		}
@@ -171,7 +176,12 @@ func parseMultipartAlternative(msg io.Reader, boundary string) (textBody, htmlBo
 			return textBody, htmlBody, embeddedFiles, err
 		}
 
-		contentType, params, err := mime.ParseMediaType(part.Header.Get("Content-Type"))
+		hContentType := strings.TrimSpace(part.Header.Get("Content-Type"))
+		if len(hContentType) == 0 {
+			continue
+		}
+
+		contentType, params, err := mime.ParseMediaType(hContentType)
 		if err != nil {
 			return textBody, htmlBody, embeddedFiles, err
 		}
@@ -227,7 +237,12 @@ func parseMultipartMixed(msg io.Reader, boundary string) (textBody, htmlBody str
 			return textBody, htmlBody, attachments, embeddedFiles, err
 		}
 
-		contentType, params, err := mime.ParseMediaType(part.Header.Get("Content-Type"))
+		hContentType := strings.TrimSpace(part.Header.Get("Content-Type"))
+		if len(hContentType) == 0 {
+			continue
+		}
+
+		contentType, params, err := mime.ParseMediaType(hContentType)
 		if err != nil {
 			return textBody, htmlBody, attachments, embeddedFiles, err
 		}
