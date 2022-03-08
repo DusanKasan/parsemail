@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"mime"
 	"mime/multipart"
+	"mime/quotedprintable"
 	"net/mail"
 	"strings"
 	"time"
@@ -106,7 +107,7 @@ func parseContentType(contentTypeHeader string) (contentType string, params map[
 func parseMultipartRelated(msg io.Reader, boundary string) (textBody, htmlBody string, embeddedFiles []EmbeddedFile, err error) {
 	pmr := multipart.NewReader(msg, boundary)
 	for {
-		part, err := pmr.NextPart()
+		part, err := pmr.NextRawPart()
 
 		if err == io.EOF {
 			break
@@ -163,7 +164,7 @@ func parseMultipartRelated(msg io.Reader, boundary string) (textBody, htmlBody s
 func parseMultipartAlternative(msg io.Reader, boundary string) (textBody, htmlBody string, embeddedFiles []EmbeddedFile, err error) {
 	pmr := multipart.NewReader(msg, boundary)
 	for {
-		part, err := pmr.NextPart()
+		part, err := pmr.NextRawPart()
 
 		if err == io.EOF {
 			break
@@ -220,7 +221,7 @@ func parseMultipartAlternative(msg io.Reader, boundary string) (textBody, htmlBo
 func parseMultipartMixed(msg io.Reader, boundary string) (textBody, htmlBody string, attachments []Attachment, embeddedFiles []EmbeddedFile, err error) {
 	mr := multipart.NewReader(msg, boundary)
 	for {
-		part, err := mr.NextPart()
+		part, err := mr.NextRawPart()
 		if err == io.EOF {
 			break
 		} else if err != nil {
@@ -361,6 +362,14 @@ func decodeContent(content io.Reader, encoding string) (io.Reader, error) {
 		}
 
 		return bytes.NewReader(dd), nil
+	case "quoted-printable":
+		decoded := quotedprintable.NewReader(content)
+		b, err := ioutil.ReadAll(decoded)
+		if err != nil {
+			return nil, err
+		}
+
+		return bytes.NewReader(b), nil
 	case "":
 		return content, nil
 	default:
@@ -483,7 +492,7 @@ type Email struct {
 	ResentMessageID string
 
 	ContentType string
-	Content io.Reader
+	Content     io.Reader
 
 	HTMLBody string
 	TextBody string
