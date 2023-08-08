@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"mime"
 	"mime/multipart"
+	"mime/quotedprintable"
 	"net/mail"
 	"strings"
 	"time"
@@ -45,9 +46,11 @@ func Parse(r io.Reader) (email Email, err error) {
 	case contentTypeMultipartRelated:
 		email.TextBody, email.HTMLBody, email.EmbeddedFiles, err = parseMultipartRelated(msg.Body, params["boundary"])
 	case contentTypeTextPlain:
+		msg.Body, _ = decodeContent(msg.Body, msg.Header.Get("Content-Transfer-Encoding"))
 		message, _ := ioutil.ReadAll(msg.Body)
 		email.TextBody = strings.TrimSuffix(string(message[:]), "\n")
 	case contentTypeTextHtml:
+		msg.Body, _ = decodeContent(msg.Body, msg.Header.Get("Content-Transfer-Encoding"))
 		message, _ := ioutil.ReadAll(msg.Body)
 		email.HTMLBody = strings.TrimSuffix(string(message[:]), "\n")
 	default:
@@ -125,12 +128,28 @@ func parseMultipartRelated(msg io.Reader, boundary string) (textBody, htmlBody s
 			if err != nil {
 				return textBody, htmlBody, embeddedFiles, err
 			}
+			ch := charsetFromParams(params)
+			if ch != Utf8 {
+				dec, err := charsetDecoder(ch)
+				if err != nil {
+					return textBody, htmlBody, embeddedFiles, err
+				}
+				ppContent, _ = dec.Bytes(ppContent)
+			}
 
 			textBody += strings.TrimSuffix(string(ppContent[:]), "\n")
 		case contentTypeTextHtml:
 			ppContent, err := ioutil.ReadAll(part)
 			if err != nil {
 				return textBody, htmlBody, embeddedFiles, err
+			}
+			ch := charsetFromParams(params)
+			if ch != Utf8 {
+				dec, err := charsetDecoder(ch)
+				if err != nil {
+					return textBody, htmlBody, embeddedFiles, err
+				}
+				ppContent, _ = dec.Bytes(ppContent)
 			}
 
 			htmlBody += strings.TrimSuffix(string(ppContent[:]), "\n")
@@ -182,12 +201,28 @@ func parseMultipartAlternative(msg io.Reader, boundary string) (textBody, htmlBo
 			if err != nil {
 				return textBody, htmlBody, embeddedFiles, err
 			}
+			ch := charsetFromParams(params)
+			if ch != Utf8 {
+				dec, err := charsetDecoder(ch)
+				if err != nil {
+					return textBody, htmlBody, embeddedFiles, err
+				}
+				ppContent, _ = dec.Bytes(ppContent)
+			}
 
 			textBody += strings.TrimSuffix(string(ppContent[:]), "\n")
 		case contentTypeTextHtml:
 			ppContent, err := ioutil.ReadAll(part)
 			if err != nil {
 				return textBody, htmlBody, embeddedFiles, err
+			}
+			ch := charsetFromParams(params)
+			if ch != Utf8 {
+				dec, err := charsetDecoder(ch)
+				if err != nil {
+					return textBody, htmlBody, embeddedFiles, err
+				}
+				ppContent, _ = dec.Bytes(ppContent)
 			}
 
 			htmlBody += strings.TrimSuffix(string(ppContent[:]), "\n")
@@ -257,12 +292,28 @@ func parseMultipartMixed(msg io.Reader, boundary string) (textBody, htmlBody str
 			if err != nil {
 				return textBody, htmlBody, attachments, embeddedFiles, err
 			}
+			ch := charsetFromParams(params)
+			if ch != Utf8 {
+				dec, err := charsetDecoder(ch)
+				if err != nil {
+					return textBody, htmlBody, attachments, embeddedFiles, err
+				}
+				ppContent, _ = dec.Bytes(ppContent)
+			}
 
 			textBody += strings.TrimSuffix(string(ppContent[:]), "\n")
 		} else if contentType == contentTypeTextHtml {
 			ppContent, err := ioutil.ReadAll(part)
 			if err != nil {
 				return textBody, htmlBody, attachments, embeddedFiles, err
+			}
+			ch := charsetFromParams(params)
+			if ch != Utf8 {
+				dec, err := charsetDecoder(ch)
+				if err != nil {
+					return textBody, htmlBody, attachments, embeddedFiles, err
+				}
+				ppContent, _ = dec.Bytes(ppContent)
 			}
 
 			htmlBody += strings.TrimSuffix(string(ppContent[:]), "\n")
@@ -362,8 +413,15 @@ func decodeContent(content io.Reader, encoding string) (io.Reader, error) {
 		if err != nil {
 			return nil, err
 		}
-
 		return bytes.NewReader(dd), nil
+	case "quoted-printable":
+		decoded := quotedprintable.NewReader(content)
+		b, err := ioutil.ReadAll(decoded)
+		if err != nil {
+			return nil, err
+		}
+
+		return bytes.NewReader(b), nil
 	case "":
 		return content, nil
 	default:
