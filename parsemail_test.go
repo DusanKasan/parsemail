@@ -431,6 +431,78 @@ So, "Hello".`,
 				},
 			},
 		},
+		15: {
+			contentType: "text/plain; charset=utf-8",
+			mailData:    rfc2045exampleA,
+			subject:     "Lead from Allstate LeadVantage",
+			from: []mail.Address{
+				{
+					Address: "LVsupport@allstateleadvantage.com",
+				},
+			},
+			to: []mail.Address{
+				{
+					Address: "test@email.com",
+				},
+			},
+			replyTo: []mail.Address{
+				{
+					Address: "no-reply@allstateleadvantage.com",
+				},
+			},
+			messageID: "0100017fcf817777-481efc68-4a9a-4c11-ba2c-40ff0357e7b1-000000@email.amazonses.com",
+			date:      parseDate("Mon, 28 Mar 2022 07:50:42 +0000"),
+			textBody:  rfc2045exampleAtext,
+		},
+		16: {
+			contentType: `text/html; charset="utf-8"`,
+			mailData:    rfc2045exampleB,
+			subject:     "New Business Property/Casualty Lead Received (#245200111)",
+			from: []mail.Address{
+				{
+					Name:    "AllWebLeads",
+					Address: "no-reply@allwebleads.com",
+				},
+			},
+			to: []mail.Address{
+				{
+					Address: "sample@example.com",
+				},
+			},
+			replyTo: []mail.Address{
+				{
+					Address: "no-reply@allwebleads.com",
+				},
+			},
+			messageID: "1187856165.40703531648591546580.JavaMail.app@rapp51.atlis1",
+			date:      parseDate("Tue, 29 Mar 2022 22:05:46 +0000"),
+			htmlBody:  rfc2045exampleBhtml,
+		},
+		17: {
+			contentType: "multipart/related; boundary=\"000000000000ab2e2205a26de587\"",
+			mailData:    multipartRelatedExampleQuoted,
+			subject:     "Saying Hello",
+			from: []mail.Address{
+				{
+					Name:    "John Doe",
+					Address: "jdoe@machine.example",
+				},
+			},
+			sender: mail.Address{
+				Name:    "Michael Jones",
+				Address: "mjones@machine.example",
+			},
+			to: []mail.Address{
+				{
+					Name:    "Mary Smith",
+					Address: "mary@example.net",
+				},
+			},
+			messageID: "1234@local.machine.example",
+			date:      parseDate("Fri, 21 Nov 1997 09:55:06 -0600"),
+			htmlBody:  rfc2045exampleBhtml,
+			textBody:  "Time for the egg. Should we hardboil the egg or fry it. We can scramble it or poach it.",
+		},
 	}
 
 	for index, td := range testData {
@@ -1012,4 +1084,229 @@ Content-Disposition: attachment;
 "Foo", "Bar", "Baz", "Bum", "Poo"
 
 --f403045f1dcc043a44054c8e6bbf--
+`
+
+var rfc2045exampleA = `From 0100017fcf817777-481efc68-4a9a-4c11-ba2c-40ff0357e7b1-000000@amazonses.com  Mon Mar 28 07:50:43 2022
+Return-Path: <0100017fcf817777-481efc68-4a9a-4c11-ba2c-40ff0357e7b1-000000@amazonses.com>
+X-Original-To: test@email.com
+Delivered-To: leads@reciever.com
+Message-ID: <0100017fcf817777-481efc68-4a9a-4c11-ba2c-40ff0357e7b1-000000@email.amazonses.com>
+Date: Mon, 28 Mar 2022 07:50:42 +0000
+Subject: Lead from Allstate LeadVantage
+From: LVsupport@allstateleadvantage.com
+Reply-To: no-reply@allstateleadvantage.com
+To: test@email.com
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: quoted-printable
+
+
+You just received a lead! Please check your lead management system, or u=
+se the contact information
+below.  Please do not respond to this email ad=
+dress, as it is not active. You may also view your leads
+in Allstate Lead=
+Vantage. Please call Allstate LeadVantage Support at 855-317-4233 or sign u=
+p here:
+https://allstateleadvantage.com/#/orders/list
+
+Lead Informati=
+on:
+Unique ID: 138296007
+Vertical: Auto Insurance
+Alliance URL: https=
+://agencygateway.allstate.com/ALLIANCE/launch?AgentNumber=3DA0c3858&ST=3DNV=
+&FunctionType=3DAF&SourceOfLaunchPoint=3D01&ControlNumber=3D198220870336180=
+
+Contact Information:
+First Name: Brenda
+Last Name: Qualls
+Phone Nu=
+mber: (702) 485-1038
+Email Address: brendaqualls29@yahoo.com
+Street Add=
+ress: 3236 Brayton Mist Dr
+City: North Las Vegas
+State: NV
+Zip: 89081=
+
+Are You A Homeowner: Yes
+Best Time To Contact:=20
+Vendor:
+Vendor Nam=
+e: Inside Response
+Order Information:
+Name: Custom Order 1
+Policy Det=
+ails:
+Self Credit Rating: Good (620 - 719)
+Currently Insured: Yes
+Cur=
+rent Insurance Company: State Farm County
+Insured Since: 03/28/2020
+Pol=
+icy Start: 03/28/2020
+Policy Expiration: 05/28/2022
+Desired Coverage Ty=
+pe: standard
+Desired Collision Deductible: 1000
+Desired Comprehensive D=
+eductible: 1000
+Driver 1:
+Gender: female
+Marital Status: married
+Ed=
+ucation Level: ged
+Occupation: other
+Date of Birth: 01/29/1981
+Age Li=
+censed: 19
+Has Valid License: Yes
+Has DUI: No
+Requires SR-22: No
+Re=
+lation to applicant: self
+Years Employed: 2
+Years at Residence: 2
+Has=
+ Tickets / Accidents: No
+Vehicle 1:
+Type: 2006 LEXUS SC 430 2WD CONVERT=
+IBLE - 4.3L V8  FI  DOHC 32V  F
+Vin: JTHFN48Y060000000
+Leased: No
+Pri=
+mary Use: Pleasure Use Only
+Commute Days: 5
+Daily Mileage: 5
+Annual M=
+ileage: 15000
+Has Alarm: Yes
+Garage: nocover
+`
+
+var rfc2045exampleAtext string = `
+You just received a lead! Please check your lead management system, or use the contact information
+below.  Please do not respond to this email address, as it is not active. You may also view your leads
+in Allstate LeadVantage. Please call Allstate LeadVantage Support at 855-317-4233 or sign up here:
+https://allstateleadvantage.com/#/orders/list
+
+Lead Information:
+Unique ID: 138296007
+Vertical: Auto Insurance
+Alliance URL: https://agencygateway.allstate.com/ALLIANCE/launch?AgentNumber=A0c3858&ST=NV&FunctionType=AF&SourceOfLaunchPoint=01&ControlNumber=198220870336180
+Contact Information:
+First Name: Brenda
+Last Name: Qualls
+Phone Number: (702) 485-1038
+Email Address: brendaqualls29@yahoo.com
+Street Address: 3236 Brayton Mist Dr
+City: North Las Vegas
+State: NV
+Zip: 89081
+Are You A Homeowner: Yes
+Best Time To Contact: 
+Vendor:
+Vendor Name: Inside Response
+Order Information:
+Name: Custom Order 1
+Policy Details:
+Self Credit Rating: Good (620 - 719)
+Currently Insured: Yes
+Current Insurance Company: State Farm County
+Insured Since: 03/28/2020
+Policy Start: 03/28/2020
+Policy Expiration: 05/28/2022
+Desired Coverage Type: standard
+Desired Collision Deductible: 1000
+Desired Comprehensive Deductible: 1000
+Driver 1:
+Gender: female
+Marital Status: married
+Education Level: ged
+Occupation: other
+Date of Birth: 01/29/1981
+Age Licensed: 19
+Has Valid License: Yes
+Has DUI: No
+Requires SR-22: No
+Relation to applicant: self
+Years Employed: 2
+Years at Residence: 2
+Has Tickets / Accidents: No
+Vehicle 1:
+Type: 2006 LEXUS SC 430 2WD CONVERTIBLE - 4.3L V8  FI  DOHC 32V  F
+Vin: JTHFN48Y060000000
+Leased: No
+Primary Use: Pleasure Use Only
+Commute Days: 5
+Daily Mileage: 5
+Annual Mileage: 15000
+Has Alarm: Yes
+Garage: nocover`
+
+var rfc2045exampleB string = `From v-biheobc_begnlldjf_icanamoe_icanamoe_a-1@bounce.allweb.mkt3103.com  Tue Mar 29 22:05:46 2022
+Return-Path: <v-biheobc_begnlldjf_icanamoe_icanamoe_a-1@bounce.allweb.mkt3103.com>
+X-Original-To: sample@example.com
+Delivered-To: leads@reciever.com
+Received: by mail2792.allweb.mkt3188.com id h8e1bk2r7ao5 for <sample@example.com>; Tue, 29 Mar 2022 22:05:46 +0000 (envelope-from <v-biheobc_begnlldjf_icanamoe_icanamoe_a-1@bounce.allweb.mkt3103.com>)
+Date: Tue, 29 Mar 2022 22:05:46 +0000 (GMT)
+From: AllWebLeads <no-reply@allwebleads.com>
+Reply-To: no-reply@allwebleads.com
+To: sample@example.com
+Message-ID: <1187856165.40703531648591546580.JavaMail.app@rapp51.atlis1>
+Subject: New Business Property/Casualty Lead Received (#245200111)
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">
+=09<div>Time for the egg.</div>
+=09<div><br/></div>
+=09<div><br/><br></div>
+=09<div>Should we hardboil the egg or fry it. We can scramble it or poach i=
+t.</div>
+</div>`
+
+var rfc2045exampleBhtml string = `<div dir="ltr">
+	<div>Time for the egg.</div>
+	<div><br/></div>
+	<div><br/><br></div>
+	<div>Should we hardboil the egg or fry it. We can scramble it or poach it.</div>
+</div>`
+var multipartRelatedExampleQuoted = `MIME-Version: 1.0
+From: John Doe <jdoe@machine.example>
+Sender: Michael Jones <mjones@machine.example>
+To: Mary Smith <mary@example.net>
+Subject: Saying Hello
+Date: Fri, 21 Nov 1997 09:55:06 -0600
+Message-ID: <1234@local.machine.example>
+Subject: ooops
+To: test@example.rocks
+Content-Type: multipart/related; boundary="000000000000ab2e2205a26de587"
+
+--000000000000ab2e2205a26de587
+Content-Type: multipart/alternative; boundary="000000000000ab2e1f05a26de586"
+
+--000000000000ab2e1f05a26de586
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+Time for the egg. Should we hardboil the egg or fry it. We can scramble it =
+or poach it.
+
+--000000000000ab2e1f05a26de586
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">
+=09<div>Time for the egg.</div>
+=09<div><br/></div>
+=09<div><br/><br></div>
+=09<div>Should we hardboil the egg or fry it. We can scramble it or poach i=
+t.</div>
+</div>
+
+--000000000000ab2e1f05a26de586--
+
+
+--000000000000ab2e2205a26de587--
 `
