@@ -4,6 +4,7 @@ import (
 	"errors"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/charmap"
+	"strings"
 )
 
 type (
@@ -44,7 +45,7 @@ func charsetFromParams(params map[string]string) Charset {
 	if charset, ok = params["charset"]; !ok {
 		return Utf8
 	}
-	return Charset(charset)
+	return Charset(strings.ToLower(charset))
 }
 
 func charsetDecoder(c Charset) (*encoding.Decoder, error) {
