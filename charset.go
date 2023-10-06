@@ -31,6 +31,7 @@ const (
 	Iso885915 Charset = "iso-8859-15"
 	Iso885916 Charset = "iso-8859-16"
 	Utf8      Charset = "utf-8"
+	UsAscii   Charset = "us-ascii"
 )
 
 func (c Charset) String() string {
