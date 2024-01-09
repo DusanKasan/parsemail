@@ -16,22 +16,23 @@ var (
 )
 
 const (
-	Iso88591  Charset = "iso-8859-1"
-	Iso88592  Charset = "iso-8859-2"
-	Iso88593  Charset = "iso-8859-3"
-	Iso88594  Charset = "iso-8859-4"
-	Iso88595  Charset = "iso-8859-5"
-	Iso88596  Charset = "iso-8859-6"
-	Iso88597  Charset = "iso-8859-7"
-	Iso88598  Charset = "iso-8859-8"
-	Iso88599  Charset = "iso-8859-9"
-	Iso885910 Charset = "iso-8859-10"
-	Iso885913 Charset = "iso-8859-13"
-	Iso885914 Charset = "iso-8859-14"
-	Iso885915 Charset = "iso-8859-15"
-	Iso885916 Charset = "iso-8859-16"
-	Utf8      Charset = "utf-8"
-	UsAscii   Charset = "us-ascii"
+	Iso88591    Charset = "iso-8859-1"
+	Iso88592    Charset = "iso-8859-2"
+	Iso88593    Charset = "iso-8859-3"
+	Iso88594    Charset = "iso-8859-4"
+	Iso88595    Charset = "iso-8859-5"
+	Iso88596    Charset = "iso-8859-6"
+	Iso88597    Charset = "iso-8859-7"
+	Iso88598    Charset = "iso-8859-8"
+	Iso88599    Charset = "iso-8859-9"
+	Iso885910   Charset = "iso-8859-10"
+	Iso885913   Charset = "iso-8859-13"
+	Iso885914   Charset = "iso-8859-14"
+	Iso885915   Charset = "iso-8859-15"
+	Iso885916   Charset = "iso-8859-16"
+	Utf8        Charset = "utf-8"
+	UsAscii     Charset = "us-ascii"
+	Windows1252 Charset = "windows-1252"
 )
 
 func (c Charset) String() string {
@@ -79,6 +80,8 @@ func charsetDecoder(c Charset) (*encoding.Decoder, error) {
 		return charmap.ISO8859_15.NewDecoder(), nil
 	case Iso885916:
 		return charmap.ISO8859_16.NewDecoder(), nil
+	case Windows1252:
+		return charmap.Windows1252.NewDecoder(), nil
 	default:
 		return nil, ErrUnsupported
 	}
