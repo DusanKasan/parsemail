@@ -171,7 +171,11 @@ func parseMultipartAlternative(msg io.Reader, boundary string) (textBody, htmlBo
 			return textBody, htmlBody, embeddedFiles, err
 		}
 
-		contentType, params, err := mime.ParseMediaType(part.Header.Get("Content-Type"))
+		var contentTypeHeader = part.Header.Get("Content-Type")
+		if len(contentTypeHeader) == 0 {
+			contentTypeHeader = contentTypeTextPlain
+		}
+		contentType, params, err := mime.ParseMediaType(contentTypeHeader)
 		if err != nil {
 			return textBody, htmlBody, embeddedFiles, err
 		}
