@@ -957,8 +957,8 @@ Message-ID: <5678.21-Nov-1997@example.com>
 Hi everyone.
 `
 
-//todo: not yet implemented in net/mail
-//once there is support for this, add it
+// todo: not yet implemented in net/mail
+// once there is support for this, add it
 var rfc5322exampleA13 = `From: Pete <pete@silly.example>
 To: A Group:Ed Jones <c@a.test>,joe@where.test,John <jdoe@one.test>;
 Cc: Undisclosed recipients:;
@@ -968,7 +968,7 @@ Message-ID: <testabcd.1234@silly.example>
 Testing.
 `
 
-//we skipped the first message bcause it's the same as A 1.1
+// we skipped the first message bcause it's the same as A 1.1
 var rfc5322exampleA2a = `From: Mary Smith <mary@example.net>
 To: John Doe <jdoe@machine.example>
 Reply-To: "Mary Smith: Personal Account" <smith@home.example>
