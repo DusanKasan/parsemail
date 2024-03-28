@@ -486,6 +486,34 @@ So, "Hello".`,
 				},
 			},
 		},
+		17: {
+			mailData:    data5,
+			contentType: `multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf`,
+			content:     "",
+			subject:     "Peter Paholík",
+			from: []mail.Address{
+				{
+					Name:    "Peter Paholík",
+					Address: "peter.paholik@gmail.com",
+				},
+			},
+			to: []mail.Address{
+				{
+					Name:    "",
+					Address: "dusan@kasan.sk",
+				},
+			},
+			messageID: "CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com",
+			date:      parseDate("Fri, 07 Apr 2017 09:17:26 +0200"),
+			htmlBody:  "<div dir=\"ltr\"><br></div>",
+			attachments: []attachmentData{
+				{
+					filename:    "text-file.txt",
+					contentType: "text/plain",
+					data:        "text file attachment sent as text/plain content-type",
+				},
+			},
+		},
 	}
 
 	for index, td := range testData {
@@ -898,6 +926,38 @@ Content-Transfer-Encoding: base64
 X-Attachment-Id: f_j17i0f0d0
 
 WzEsIDIsIDNd
+--f403045f1dcc043a44054c8e6bbf--
+`
+
+var data5 = `From: =?UTF-8?Q?Peter_Pahol=C3=ADk?= <peter.paholik@gmail.com>
+Date: Fri, 7 Apr 2017 09:17:26 +0200
+Message-ID: <CACtgX4kNXE7T5XKSKeH_zEcfUUmf2vXVASxYjaaK9cCn-3zb_g@mail.gmail.com>
+Subject: =?UTF-8?Q?Peter_Pahol=C3=ADk?=
+To: dusan@kasan.sk
+Content-Type: multipart/mixed; boundary=f403045f1dcc043a44054c8e6bbf
+
+--f403045f1dcc043a44054c8e6bbf
+Content-Type: multipart/alternative; boundary=f403045f1dcc043a3f054c8e6bbd
+
+--f403045f1dcc043a3f054c8e6bbd
+Content-Transfer-Encoding: 7bit
+
+
+
+--f403045f1dcc043a3f054c8e6bbd
+Content-Type: text/html; charset=UTF-8
+
+<div dir="ltr"><br></div>
+
+--f403045f1dcc043a3f054c8e6bbd--
+--f403045f1dcc043a44054c8e6bbf
+Content-Type: text/plain;
+	name="text-file.txt"
+Content-Disposition: attachment
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_j17i0f0d0
+
+dGV4dCBmaWxlIGF0dGFjaG1lbnQgc2VudCBhcyB0ZXh0L3BsYWluIGNvbnRlbnQtdHlwZQ==
 --f403045f1dcc043a44054c8e6bbf--
 `
 
